@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { TrendingUp, TrendingDown, DollarSign, ShoppingCart, Users, BookOpen, Eye, Edit, Trash2, Plus, Search, Filter, ChevronDown, Package, CheckCircle, XCircle, Clock, BarChart3 } from 'lucide-react';
-import { books, orders, users, salesData, categories, Book, Order, User } from '../../data/books';
+import { salesData, categories, Order } from '../../data/books';
+import { useAdmin } from '../../context/AdminContext';
 
 export default function AdminDashboard() {
+  const { books, orders, users } = useAdmin();
   const [activeSection] = useState('overview');
 
   const stats = [
@@ -100,7 +102,7 @@ export default function AdminDashboard() {
               return (
                 <div key={cat.id} className="space-y-1">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-white/60">{cat.icon} {cat.name}</span>
+                    <span className="text-white/60">{cat.name}</span>
                     <span className="text-white/30">{pct}٪</span>
                   </div>
                   <div className="h-2 bg-white/5 rounded-full overflow-hidden">

@@ -1,8 +1,11 @@
 import { useState } from 'react';
-import { Save, Globe, Truck, CreditCard, Mail, Bell, Shield, Palette } from 'lucide-react';
+import { Save, Globe, Truck, CreditCard, Bell, Shield, Palette, Check } from 'lucide-react';
+import { useAdmin } from '../../context/AdminContext';
 
 export default function AdminSettings() {
+  const { settings, updateSettings } = useAdmin();
   const [activeTab, setActiveTab] = useState('general');
+  const [toast, setToast] = useState<string | null>(null);
 
   const tabs = [
     { id: 'general', label: 'عمومی', icon: Globe },
@@ -13,8 +16,21 @@ export default function AdminSettings() {
     { id: 'appearance', label: 'ظاهر', icon: Palette },
   ];
 
+  const handleSave = () => {
+    updateSettings(settings);
+    setToast('تنظیمات با موفقیت ذخیره شد');
+    setTimeout(() => setToast(null), 3000);
+  };
+
   return (
     <div className="space-y-6">
+      {toast && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[100] px-5 py-3 rounded-xl shadow-2xl flex items-center gap-2 animate-fade-in-up bg-emerald-500/90 text-white">
+          <Check className="w-4 h-4" />
+          <span className="text-sm font-medium">{toast}</span>
+        </div>
+      )}
+
       <div>
         <h1 className="text-2xl font-black text-white">تنظیمات</h1>
         <p className="text-sm text-white/40 mt-1">تنظیمات فروشگاه و سیستم</p>
@@ -48,31 +64,60 @@ export default function AdminSettings() {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs text-white/40 mb-1.5 block">نام فروشگاه</label>
-                    <input type="text" defaultValue="کتاب‌خانه نوین" className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl text-sm text-white outline-none focus:border-gold-500/30" />
+                    <input
+                      type="text"
+                      value={settings.storeName}
+                      onChange={(e) => updateSettings({ storeName: e.target.value })}
+                      className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl text-sm text-white outline-none focus:border-gold-500/30"
+                    />
                   </div>
                   <div>
                     <label className="text-xs text-white/40 mb-1.5 block">ایمیل فروشگاه</label>
-                    <input type="email" defaultValue="info@ketabkhaneh-novin.ir" className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl text-sm text-white outline-none focus:border-gold-500/30" />
+                    <input
+                      type="email"
+                      value={settings.email}
+                      onChange={(e) => updateSettings({ email: e.target.value })}
+                      className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl text-sm text-white outline-none focus:border-gold-500/30"
+                    />
                   </div>
                   <div>
                     <label className="text-xs text-white/40 mb-1.5 block">تلفن تماس</label>
-                    <input type="text" defaultValue="۰۲۱-۱۲۳۴۵۶۷۸" className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl text-sm text-white outline-none focus:border-gold-500/30" />
+                    <input
+                      type="text"
+                      value={settings.phone}
+                      onChange={(e) => updateSettings({ phone: e.target.value })}
+                      className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl text-sm text-white outline-none focus:border-gold-500/30"
+                    />
                   </div>
                   <div>
                     <label className="text-xs text-white/40 mb-1.5 block">واحد پول</label>
-                    <select className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl text-sm text-white/60 outline-none">
-                      <option>تومان</option>
-                      <option>ریال</option>
+                    <select
+                      value={settings.currency}
+                      onChange={(e) => updateSettings({ currency: e.target.value })}
+                      className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl text-sm text-white/60 outline-none"
+                    >
+                      <option value="تومان">تومان</option>
+                      <option value="ریال">ریال</option>
                     </select>
                   </div>
                 </div>
                 <div>
                   <label className="text-xs text-white/40 mb-1.5 block">آدرس</label>
-                  <input type="text" defaultValue="تهران، خیابان انقلاب، پلاک ۱۲۳" className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl text-sm text-white outline-none focus:border-gold-500/30" />
+                  <input
+                    type="text"
+                    value={settings.address}
+                    onChange={(e) => updateSettings({ address: e.target.value })}
+                    className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl text-sm text-white outline-none focus:border-gold-500/30"
+                  />
                 </div>
                 <div>
                   <label className="text-xs text-white/40 mb-1.5 block">توضیحات فروشگاه</label>
-                  <textarea rows={3} defaultValue="فروشگاه آنلاین کتاب‌خانه نوین با بیش از ۱۰ سال سابقه..." className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl text-sm text-white outline-none focus:border-gold-500/30 resize-none" />
+                  <textarea
+                    rows={3}
+                    value={settings.description}
+                    onChange={(e) => updateSettings({ description: e.target.value })}
+                    className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl text-sm text-white outline-none focus:border-gold-500/30 resize-none"
+                  />
                 </div>
               </>
             )}
@@ -83,22 +128,41 @@ export default function AdminSettings() {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs text-white/40 mb-1.5 block">هزینه ارسال عادی (تومان)</label>
-                    <input type="number" defaultValue="35000" className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl text-sm text-white outline-none focus:border-gold-500/30" />
+                    <input
+                      type="number"
+                      value={settings.shippingCost}
+                      onChange={(e) => updateSettings({ shippingCost: Number(e.target.value) })}
+                      className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl text-sm text-white outline-none focus:border-gold-500/30"
+                    />
                   </div>
                   <div>
                     <label className="text-xs text-white/40 mb-1.5 block">ارسال رایگان از (تومان)</label>
-                    <input type="number" defaultValue="500000" className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl text-sm text-white outline-none focus:border-gold-500/30" />
+                    <input
+                      type="number"
+                      value={settings.freeShippingThreshold}
+                      onChange={(e) => updateSettings({ freeShippingThreshold: Number(e.target.value) })}
+                      className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl text-sm text-white outline-none focus:border-gold-500/30"
+                    />
                   </div>
                   <div>
                     <label className="text-xs text-white/40 mb-1.5 block">زمان پردازش (روز)</label>
-                    <input type="number" defaultValue="2" className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl text-sm text-white outline-none focus:border-gold-500/30" />
+                    <input
+                      type="number"
+                      value={settings.processingTime}
+                      onChange={(e) => updateSettings({ processingTime: Number(e.target.value) })}
+                      className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl text-sm text-white outline-none focus:border-gold-500/30"
+                    />
                   </div>
                   <div>
                     <label className="text-xs text-white/40 mb-1.5 block">شرکت پستی پیش‌فرض</label>
-                    <select className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl text-sm text-white/60 outline-none">
-                      <option>پست پیشتاز</option>
-                      <option>تیپاکس</option>
-                      <option>پست سفارشی</option>
+                    <select
+                      value={settings.defaultCourier}
+                      onChange={(e) => updateSettings({ defaultCourier: e.target.value })}
+                      className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl text-sm text-white/60 outline-none"
+                    >
+                      <option value="post-express">پست پیشتاز</option>
+                      <option value="tipax">تیپاکس</option>
+                      <option value="post-regular">پست سفارشی</option>
                     </select>
                   </div>
                 </div>
@@ -118,7 +182,12 @@ export default function AdminSettings() {
                       </div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" defaultChecked className="sr-only peer" />
+                      <input
+                        type="checkbox"
+                        checked={settings.onlinePayment}
+                        onChange={(e) => updateSettings({ onlinePayment: e.target.checked })}
+                        className="sr-only peer"
+                      />
                       <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gold-500"></div>
                     </label>
                   </div>
@@ -131,7 +200,12 @@ export default function AdminSettings() {
                       </div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" defaultChecked className="sr-only peer" />
+                      <input
+                        type="checkbox"
+                        checked={settings.cardToCard}
+                        onChange={(e) => updateSettings({ cardToCard: e.target.checked })}
+                        className="sr-only peer"
+                      />
                       <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gold-500"></div>
                     </label>
                   </div>
@@ -144,7 +218,12 @@ export default function AdminSettings() {
                       </div>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
-                      <input type="checkbox" className="sr-only peer" />
+                      <input
+                        type="checkbox"
+                        checked={settings.codPayment}
+                        onChange={(e) => updateSettings({ codPayment: e.target.checked })}
+                        className="sr-only peer"
+                      />
                       <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gold-500"></div>
                     </label>
                   </div>
@@ -157,10 +236,10 @@ export default function AdminSettings() {
                 <h3 className="text-lg font-bold text-white">تنظیمات اعلان‌ها</h3>
                 <div className="space-y-4">
                   {[
-                    { title: 'اعلان سفارش جدید', desc: 'دریافت ایمیل هنگام ثبت سفارش جدید', checked: true },
-                    { title: 'اعلان ثبت‌نام کاربر', desc: 'دریافت اعلان هنگام ثبت‌نام کاربر جدید', checked: true },
-                    { title: 'خلاصه روزانه فروش', desc: 'دریافت گزارش روزانه فروش', checked: false },
-                    { title: 'هشدار موجودی کم', desc: 'هشدار هنگام کم شدن موجودی کتاب', checked: true },
+                    { key: 'orderNotification', title: 'اعلان سفارش جدید', desc: 'دریافت ایمیل هنگام ثبت سفارش جدید' },
+                    { key: 'userNotification', title: 'اعلان ثبت‌نام کاربر', desc: 'دریافت اعلان هنگام ثبت‌نام کاربر جدید' },
+                    { key: 'dailyReport', title: 'خلاصه روزانه فروش', desc: 'دریافت گزارش روزانه فروش' },
+                    { key: 'stockAlert', title: 'هشدار موجودی کم', desc: 'هشدار هنگام کم شدن موجودی کتاب' },
                   ].map((item, i) => (
                     <div key={i} className="flex items-center justify-between p-4 bg-white/3 rounded-xl">
                       <div>
@@ -168,7 +247,7 @@ export default function AdminSettings() {
                         <p className="text-xs text-white/30">{item.desc}</p>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" defaultChecked={item.checked} className="sr-only peer" />
+                        <input type="checkbox" defaultChecked className="sr-only peer" />
                         <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-gold-500"></div>
                       </label>
                     </div>
@@ -203,17 +282,26 @@ export default function AdminSettings() {
                 <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs text-white/40 mb-1.5 block">تم رنگی</label>
-                    <select className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl text-sm text-white/60 outline-none">
-                      <option>تیره (پیش‌فرض)</option>
-                      <option>روشن</option>
-                      <option>خودکار</option>
+                    <select
+                      value={settings.theme}
+                      onChange={(e) => updateSettings({ theme: e.target.value })}
+                      className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl text-sm text-white/60 outline-none"
+                    >
+                      <option value="dark">تیره (پیش‌فرض)</option>
+                      <option value="light">روشن</option>
+                      <option value="auto">خودکار</option>
                     </select>
                   </div>
                   <div>
                     <label className="text-xs text-white/40 mb-1.5 block">رنگ اصلی</label>
                     <div className="flex gap-2">
-                      {['bg-purple-500', 'bg-blue-500', 'bg-emerald-500', 'bg-gold-500', 'bg-red-500'].map((color, i) => (
-                        <button key={i} className={`w-8 h-8 rounded-lg ${color} ${i === 0 ? 'ring-2 ring-white' : ''}`} />
+                      {['#7c3aed', '#3b82f6', '#10b981', '#f59e0b', '#ef4444'].map((color, i) => (
+                        <button
+                          key={i}
+                          onClick={() => updateSettings({ primaryColor: color })}
+                          className={`w-8 h-8 rounded-lg ${settings.primaryColor === color ? 'ring-2 ring-white' : ''}`}
+                          style={{ backgroundColor: color }}
+                        />
                       ))}
                     </div>
                   </div>
@@ -223,7 +311,10 @@ export default function AdminSettings() {
 
             {/* Save button */}
             <div className="pt-4 border-t border-white/5 flex justify-end">
-              <button className="flex items-center gap-2 px-6 py-3 bg-gradient-to-l from-gold-500 to-gold-600 text-brand-950 rounded-xl font-bold text-sm shadow-lg shadow-gold-500/20">
+              <button
+                onClick={handleSave}
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-l from-gold-500 to-gold-600 text-brand-950 rounded-xl font-bold text-sm shadow-lg shadow-gold-500/20"
+              >
                 <Save className="w-4 h-4" />
                 ذخیره تغییرات
               </button>

@@ -27,7 +27,7 @@ export default function Header() {
             <span>جشنواره فروش بهاره — تا ۵۰٪ تخفیف روی صدها عنوان کتاب</span>
           </div>
           <div className="hidden md:flex items-center gap-4 text-xs text-white/50">
-            <span>📞 ۰۲۱-۱۲۳۴۵۶۷۸</span>
+            <span>۰۲۱-۱۲۳۴۵۶۷۸</span>
             <span className="w-px h-3 bg-white/20" />
             <span>ارسال رایگان بالای ۵۰۰ هزار تومان</span>
           </div>
@@ -119,13 +119,13 @@ export default function Header() {
           <div className="max-w-7xl mx-auto px-4">
             <nav className={`${mobileMenuOpen ? 'flex' : 'hidden'} md:flex flex-col md:flex-row md:items-center gap-0.5 md:gap-1 py-2 md:py-0`}>
               {[
-                { to: '/', label: 'صفحه اصلی', icon: '🏠' },
-                { to: '/books', label: 'همه کتاب‌ها', icon: '📚' },
-                { to: '/books?category=fiction', label: 'رمان و داستان', icon: '📖' },
-                { to: '/books?category=self-help', label: 'توسعه فردی', icon: '🌱' },
-                { to: '/books?category=tech', label: 'فناوری', icon: '💻' },
-                { to: '/books?format=digital', label: 'کتاب دیجیتال', icon: '📱', special: true },
-                { to: '/books?sale=true', label: 'تخفیف‌ها', icon: '🏷️', special: true },
+                { to: '/', label: 'صفحه اصلی' },
+                { to: '/books', label: 'همه کتاب‌ها' },
+                { to: '/books?category=fiction', label: 'رمان و داستان' },
+                { to: '/books?category=self-help', label: 'توسعه فردی' },
+                { to: '/books?category=tech', label: 'فناوری' },
+                { to: '/books?format=digital', label: 'کتاب دیجیتال', special: true },
+                { to: '/books?sale=true', label: 'تخفیف‌ها', special: true },
               ].map((item) => (
                 <Link
                   key={item.to}
@@ -136,7 +136,6 @@ export default function Header() {
                       : 'text-white/60 hover:text-white hover:bg-white/5'
                   }`}
                 >
-                  <span className="ml-1">{item.icon}</span>
                   {item.label}
                 </Link>
               ))}

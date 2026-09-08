@@ -71,7 +71,7 @@ export default function BookCard({ book, index = 0 }: BookCardProps) {
         {/* Category */}
         <div className="flex items-center justify-between">
           <span className="text-[10px] text-brand-400 bg-brand-500/10 px-2 py-0.5 rounded-full">
-            {book.format === 'digital' ? '📱 دیجیتال' : book.format === 'both' ? '📖📱 هر دو' : '📖 کاغذی'}
+            {book.format === 'digital' ? 'دیجیتال' : book.format === 'both' ? 'کاغذی و دیجیتال' : 'کاغذی'}
           </span>
           <div className="flex items-center gap-0.5">
             <Star className="w-3 h-3 fill-gold-400 text-gold-400" />

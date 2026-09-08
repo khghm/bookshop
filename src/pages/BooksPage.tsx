@@ -119,7 +119,7 @@ export default function BooksPage() {
                     onClick={() => toggleCategory(cat.id)}
                     className={`px-3 py-1.5 rounded-lg text-xs transition-all ${selectedCategory === cat.id ? 'bg-gold-500/20 text-gold-400 border border-gold-500/30' : 'bg-white/5 text-white/40 hover:text-white'}`}
                   >
-                    {cat.icon} {cat.name}
+                    {cat.name}
                   </button>
                 ))}
               </div>
@@ -127,7 +127,7 @@ export default function BooksPage() {
             <div>
               <h4 className="text-xs text-white/40 mb-2">فرمت</h4>
               <div className="flex flex-wrap gap-1.5">
-                {[{ id: 'paper', label: '📖 کاغذی' }, { id: 'digital', label: '📱 دیجیتال' }].map(fmt => (
+                {[{ id: 'paper', label: 'کاغذی' }, { id: 'digital', label: 'دیجیتال' }].map(fmt => (
                   <button
                     key={fmt.id}
                     onClick={() => toggleFormat(fmt.id)}
@@ -194,7 +194,9 @@ export default function BooksPage() {
         </div>
       ) : (
         <div className="text-center py-20">
-          <div className="text-5xl mb-4">📚</div>
+          <div className="w-20 h-20 glass rounded-full flex items-center justify-center mx-auto mb-4">
+            <Search className="w-10 h-10 text-white/20" />
+          </div>
           <h3 className="text-lg font-bold text-white/60">کتابی یافت نشد</h3>
           <p className="text-sm text-white/30 mt-1">فیلترهای خود را تغییر دهید</p>
           <button onClick={clearFilters} className="mt-4 px-6 py-2 bg-gold-500/20 text-gold-400 rounded-xl text-sm">

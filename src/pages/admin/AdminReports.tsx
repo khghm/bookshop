@@ -1,7 +1,9 @@
 import { BarChart3, TrendingUp, DollarSign, ShoppingCart, Users, BookOpen, Calendar, Download } from 'lucide-react';
-import { salesData, books, orders, users } from '../../data/books';
+import { salesData } from '../../data/books';
+import { useAdmin } from '../../context/AdminContext';
 
 export default function AdminReports() {
+  const { books, orders, users } = useAdmin();
   const totalRevenue = salesData.reduce((sum, d) => sum + d.revenue, 0);
   const totalSales = salesData.reduce((sum, d) => sum + d.sales, 0);
   const avgOrderValue = totalRevenue / orders.length;

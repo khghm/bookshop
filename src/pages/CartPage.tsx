@@ -55,7 +55,7 @@ export default function CartPage() {
                     </button>
                   </div>
                   <span className={`inline-block text-xs mt-2 px-2 py-0.5 rounded ${item.format === 'digital' ? 'bg-purple-500/20 text-purple-300' : 'bg-white/5 text-white/40'}`}>
-                    {item.format === 'digital' ? '📱 دیجیتال' : '📖 کاغذی'}
+                    {item.format === 'digital' ? 'دیجیتال' : 'کاغذی'}
                   </span>
                   <div className="flex items-center justify-between mt-4">
                     <div className="flex items-center gap-2">

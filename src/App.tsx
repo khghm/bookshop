@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useState } from 'react';
 import { CartProvider } from './context/CartContext';
+import { AdminProvider } from './context/AdminContext';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import CartSidebar from './components/CartSidebar';
@@ -23,8 +24,9 @@ function App() {
 
   return (
     <Router>
-      <CartProvider>
-        <Routes>
+      <AdminProvider>
+        <CartProvider>
+          <Routes>
           {/* Public routes */}
           <Route path="/" element={
             <div className="min-h-screen flex flex-col">
@@ -120,8 +122,9 @@ function App() {
               </AdminLayout>
             ) : <Navigate to="/admin" />
           } />
-        </Routes>
-      </CartProvider>
+          </Routes>
+        </CartProvider>
+      </AdminProvider>
     </Router>
   );
 }

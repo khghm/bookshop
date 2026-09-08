@@ -101,7 +101,6 @@ export default function HomePage() {
               className={`group glass rounded-2xl p-5 hover:border-gold-500/30 transition-all hover:scale-[1.02] opacity-0 animate-fade-in-up`}
               style={{ animationDelay: `${i * 0.05}s` }}
             >
-              <div className="text-3xl mb-3">{cat.icon}</div>
               <h3 className="text-sm font-bold text-white group-hover:text-gold-400 transition-colors">{cat.name}</h3>
               <p className="text-xs text-white/30 mt-1">{cat.count} عنوان</p>
             </Link>
@@ -139,14 +138,16 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-l from-brand-900/80 to-brand-800/60" />
           <div className="relative p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-6">
             <div>
-              <h3 className="text-2xl md:text-3xl font-black text-white">کتاب‌های دیجیتال 📱</h3>
+              <h3 className="text-2xl md:text-3xl font-black text-white">کتاب‌های دیجیتال</h3>
               <p className="text-white/50 mt-2 max-w-md">دسترسی فوری به هزاران کتاب دیجیتال با ۳۰٪ تخفیف ویژه. مطالعه در هر زمان و هر مکان!</p>
               <Link to="/books?format=digital" className="inline-flex items-center gap-2 mt-4 px-6 py-3 bg-gradient-to-l from-gold-500 to-gold-600 text-brand-950 rounded-xl font-bold text-sm shadow-lg shadow-gold-500/20">
                 مشاهده کتاب‌های دیجیتال
                 <ArrowLeft className="w-4 h-4" />
               </Link>
             </div>
-            <div className="text-6xl animate-float">📚</div>
+            <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-2xl shadow-brand-500/30 animate-float">
+              <BookOpen className="w-12 h-12 text-white" />
+            </div>
           </div>
         </div>
       </section>

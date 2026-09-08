@@ -34,7 +34,7 @@ export default function Footer() {
         <div className="max-w-7xl mx-auto px-4 py-10 relative">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div>
-              <h3 className="text-xl font-black text-white">عضویت در خبرنامه ✉️</h3>
+              <h3 className="text-xl font-black text-white">عضویت در خبرنامه</h3>
               <p className="text-sm text-white/40 mt-1">از آخرین تخفیف‌ها و کتاب‌های جدید باخبر شوید</p>
             </div>
             <div className="flex w-full md:w-auto gap-2">

@@ -68,8 +68,8 @@ export default function BookDetailPage() {
         <div className="space-y-6">
           <div className="space-y-2">
             <div className="flex flex-wrap gap-2">
-              {book.bestseller && <span className="px-2.5 py-1 bg-gold-500/20 text-gold-400 text-xs font-bold rounded-lg">🏆 پرفروش</span>}
-              {book.newArrival && <span className="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-lg">✨ جدید</span>}
+              {book.bestseller && <span className="px-2.5 py-1 bg-gold-500/20 text-gold-400 text-xs font-bold rounded-lg">پرفروش</span>}
+              {book.newArrival && <span className="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 text-xs font-bold rounded-lg">جدید</span>}
             </div>
             <h1 className="text-3xl md:text-4xl font-black text-white">{book.title}</h1>
             <p className="text-lg text-white/50">نویسنده: <span className="text-gold-400 font-medium">{book.author}</span></p>

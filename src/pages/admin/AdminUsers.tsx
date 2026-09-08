@@ -1,10 +1,15 @@
 import { useState } from 'react';
-import { Search, Eye, Edit, Ban, CheckCircle, Mail, Phone, Calendar, DollarSign, ShoppingBag } from 'lucide-react';
-import { users, User } from '../../data/books';
+import { Search, Eye, Edit, Ban, CheckCircle, AlertTriangle, X, ChevronDown } from 'lucide-react';
+import { useAdmin } from '../../context/AdminContext';
+import { User } from '../../data/books';
 
 export default function AdminUsers() {
+  const { users, updateUserStatus, deleteUser } = useAdmin();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
 
   const filteredUsers = users.filter(u => {
     if (searchQuery && !u.name.includes(searchQuery) && !u.email.includes(searchQuery)) return false;
@@ -18,8 +23,34 @@ export default function AdminUsers() {
     banned: { label: 'مسدود', color: 'text-red-400 bg-red-500/10' },
   };
 
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const handleStatusChange = (userId: number, newStatus: User['status']) => {
+    updateUserStatus(userId, newStatus);
+    showToast('وضعیت کاربر بروزرسانی شد');
+    if (selectedUser?.id === userId) {
+      setSelectedUser({ ...selectedUser, status: newStatus });
+    }
+  };
+
+  const handleDelete = (id: number) => {
+    deleteUser(id);
+    setDeleteConfirm(null);
+    showToast('کاربر حذف شد');
+  };
+
   return (
     <div className="space-y-6">
+      {toast && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[100] px-5 py-3 rounded-xl shadow-2xl flex items-center gap-2 animate-fade-in-up bg-emerald-500/90 text-white">
+          <CheckCircle className="w-4 h-4" />
+          <span className="text-sm font-medium">{toast}</span>
+        </div>
+      )}
+
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-white">مدیریت کاربران</h1>
@@ -103,17 +134,33 @@ export default function AdminUsers() {
                     <td className="px-4 py-3 text-sm text-white/60">{user.totalOrders}</td>
                     <td className="px-4 py-3 text-sm font-medium text-gold-400">{user.totalSpent.toLocaleString('fa-IR')} ت</td>
                     <td className="px-4 py-3">
-                      <span className={`text-xs px-2 py-1 rounded-lg ${sc.color}`}>{sc.label}</span>
+                      <div className="relative">
+                        <select
+                          value={user.status}
+                          onChange={(e) => handleStatusChange(user.id, e.target.value as User['status'])}
+                          className={`appearance-none text-xs px-2 py-1 pr-2 pl-6 rounded-lg ${sc.color} outline-none cursor-pointer`}
+                        >
+                          <option value="active">فعال</option>
+                          <option value="inactive">غیرفعال</option>
+                          <option value="banned">مسدود</option>
+                        </select>
+                        <ChevronDown className="absolute left-1 top-1/2 -translate-y-1/2 w-3 h-3 pointer-events-none" />
+                      </div>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1">
-                        <button className="w-7 h-7 rounded-lg hover:bg-white/5 flex items-center justify-center text-white/30 hover:text-blue-400 transition-colors">
+                        <button
+                          onClick={() => setSelectedUser(user)}
+                          className="w-7 h-7 rounded-lg hover:bg-white/5 flex items-center justify-center text-white/30 hover:text-blue-400 transition-colors"
+                          title="مشاهده"
+                        >
                           <Eye className="w-3.5 h-3.5" />
                         </button>
-                        <button className="w-7 h-7 rounded-lg hover:bg-white/5 flex items-center justify-center text-white/30 hover:text-gold-400 transition-colors">
-                          <Edit className="w-3.5 h-3.5" />
-                        </button>
-                        <button className="w-7 h-7 rounded-lg hover:bg-white/5 flex items-center justify-center text-white/30 hover:text-red-400 transition-colors">
+                        <button
+                          onClick={() => setDeleteConfirm(user.id)}
+                          className="w-7 h-7 rounded-lg hover:bg-white/5 flex items-center justify-center text-white/30 hover:text-red-400 transition-colors"
+                          title="حذف"
+                        >
                           <Ban className="w-3.5 h-3.5" />
                         </button>
                       </div>
@@ -125,6 +172,84 @@ export default function AdminUsers() {
           </table>
         </div>
       </div>
+
+      {/* User details modal */}
+      {selectedUser && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setSelectedUser(null)}>
+          <div className="bg-[#0f0f1a] border border-white/5 rounded-2xl w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
+            <div className="p-5 border-b border-white/5 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-white">پروفایل کاربر</h3>
+              <button onClick={() => setSelectedUser(null)} className="w-8 h-8 glass rounded-lg flex items-center justify-center text-white/40 hover:text-white">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 bg-gradient-to-br from-brand-500 to-brand-700 rounded-2xl flex items-center justify-center text-white text-2xl font-bold">
+                  {selectedUser.avatar}
+                </div>
+                <div>
+                  <h4 className="text-lg font-bold text-white">{selectedUser.name}</h4>
+                  <p className="text-sm text-white/40">{selectedUser.email}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="glass rounded-xl p-3">
+                  <p className="text-[10px] text-white/30">تلفن</p>
+                  <p className="text-sm font-medium text-white">{selectedUser.phone}</p>
+                </div>
+                <div className="glass rounded-xl p-3">
+                  <p className="text-[10px] text-white/30">تاریخ عضویت</p>
+                  <p className="text-sm font-medium text-white">{selectedUser.joinDate}</p>
+                </div>
+                <div className="glass rounded-xl p-3">
+                  <p className="text-[10px] text-white/30">تعداد سفارشات</p>
+                  <p className="text-sm font-bold text-gold-400">{selectedUser.totalOrders}</p>
+                </div>
+                <div className="glass rounded-xl p-3">
+                  <p className="text-[10px] text-white/30">مجموع خرید</p>
+                  <p className="text-sm font-bold text-gold-400">{selectedUser.totalSpent.toLocaleString('fa-IR')} تومان</p>
+                </div>
+              </div>
+              <div>
+                <p className="text-xs text-white/40 mb-2">وضعیت:</p>
+                <select
+                  value={selectedUser.status}
+                  onChange={(e) => handleStatusChange(selectedUser.id, e.target.value as User['status'])}
+                  className="w-full px-3 py-2 bg-white/5 border border-white/5 rounded-xl text-sm text-white outline-none"
+                >
+                  <option value="active">فعال</option>
+                  <option value="inactive">غیرفعال</option>
+                  <option value="banned">مسدود</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete confirmation */}
+      {deleteConfirm !== null && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setDeleteConfirm(null)}>
+          <div className="bg-[#0f0f1a] border border-white/5 rounded-2xl w-full max-w-md p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-red-500/10 rounded-xl flex items-center justify-center">
+                <AlertTriangle className="w-5 h-5 text-red-400" />
+              </div>
+              <h3 className="text-lg font-bold text-white">حذف کاربر</h3>
+            </div>
+            <p className="text-sm text-white/50 mb-6">آیا از حذف این کاربر اطمینان دارید؟</p>
+            <div className="flex gap-2">
+              <button onClick={() => handleDelete(deleteConfirm)} className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium text-sm transition-colors">
+                تایید حذف
+              </button>
+              <button onClick={() => setDeleteConfirm(null)} className="flex-1 py-2.5 glass rounded-xl text-sm text-white/60 hover:text-white">
+                انصراف
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

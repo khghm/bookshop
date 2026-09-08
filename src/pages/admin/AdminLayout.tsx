@@ -1,6 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, BookOpen, ShoppingCart, Users, BarChart3, Settings, LogOut, Bell, Search, Menu, X, Package, Tag } from 'lucide-react';
 import { useState } from 'react';
+import { useAdmin } from '../../context/AdminContext';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -11,6 +12,8 @@ export default function AdminLayout({ children, onLogout }: AdminLayoutProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { notifications, clearNotifications } = useAdmin();
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   const navItems = [
     { path: '/admin/dashboard', icon: LayoutDashboard, label: 'داشبورد' },
@@ -100,9 +103,15 @@ export default function AdminLayout({ children, onLogout }: AdminLayoutProps) {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <button className="relative w-9 h-9 glass rounded-xl flex items-center justify-center text-white/40 hover:text-white transition-colors">
+              <button
+                onClick={clearNotifications}
+                className="relative w-9 h-9 glass rounded-xl flex items-center justify-center text-white/40 hover:text-white transition-colors"
+                title="پاک کردن اعلان‌ها"
+              >
                 <Bell className="w-4 h-4" />
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[9px] text-white flex items-center justify-center font-bold">۳</span>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[9px] text-white flex items-center justify-center font-bold">{unreadCount}</span>
+                )}
               </button>
               <div className="flex items-center gap-2 px-3 py-1.5 glass rounded-xl">
                 <div className="w-7 h-7 bg-gradient-to-br from-brand-500 to-brand-700 rounded-lg flex items-center justify-center text-white text-xs font-bold">م</div>

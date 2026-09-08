@@ -47,14 +47,14 @@ export interface User {
 }
 
 export const categories = [
-  { id: 'fiction', name: 'داستان و رمان', icon: '📖', count: 156 },
-  { id: 'science', name: 'علمی و دانشگاهی', icon: '🔬', count: 98 },
-  { id: 'history', name: 'تاریخ و سیاست', icon: '🏛️', count: 74 },
-  { id: 'self-help', name: 'توسعه فردی', icon: '🌱', count: 112 },
-  { id: 'children', name: 'کودک و نوجوان', icon: '🧒', count: 89 },
-  { id: 'art', name: 'هنر و ادبیات', icon: '🎨', count: 63 },
-  { id: 'tech', name: 'فناوری و برنامه‌نویسی', icon: '💻', count: 45 },
-  { id: 'philosophy', name: 'فلسفه و عرفان', icon: '🤔', count: 57 },
+  { id: 'fiction', name: 'داستان و رمان', count: 156 },
+  { id: 'science', name: 'علمی و دانشگاهی', count: 98 },
+  { id: 'history', name: 'تاریخ و سیاست', count: 74 },
+  { id: 'self-help', name: 'توسعه فردی', count: 112 },
+  { id: 'children', name: 'کودک و نوجوان', count: 89 },
+  { id: 'art', name: 'هنر و ادبیات', count: 63 },
+  { id: 'tech', name: 'فناوری و برنامه‌نویسی', count: 45 },
+  { id: 'philosophy', name: 'فلسفه و عرفان', count: 57 },
 ];
 
 export const books: Book[] = [

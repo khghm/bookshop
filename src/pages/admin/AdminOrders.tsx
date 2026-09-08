@@ -1,10 +1,15 @@
 import { useState } from 'react';
-import { Search, Filter, Eye, Package, CheckCircle, XCircle, Clock, Truck, Download, ChevronDown } from 'lucide-react';
-import { orders, Order } from '../../data/books';
+import { Search, Eye, Package, CheckCircle, XCircle, Clock, Truck, Download, ChevronDown, Trash2, AlertTriangle, X } from 'lucide-react';
+import { useAdmin } from '../../context/AdminContext';
+import { Order } from '../../data/books';
 
 export default function AdminOrders() {
+  const { orders, updateOrderStatus, deleteOrder } = useAdmin();
   const [statusFilter, setStatusFilter] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
 
   const filteredOrders = orders.filter(o => {
     if (statusFilter && o.status !== statusFilter) return false;
@@ -29,14 +34,40 @@ export default function AdminOrders() {
     cancelled: orders.filter(o => o.status === 'cancelled').length,
   };
 
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const handleStatusChange = (orderId: string, newStatus: Order['status']) => {
+    updateOrderStatus(orderId, newStatus);
+    showToast('وضعیت سفارش بروزرسانی شد');
+    if (selectedOrder?.id === orderId) {
+      setSelectedOrder({ ...selectedOrder, status: newStatus });
+    }
+  };
+
+  const handleDelete = (id: string) => {
+    deleteOrder(id);
+    setDeleteConfirm(null);
+    showToast('سفارش حذف شد');
+  };
+
   return (
     <div className="space-y-6">
+      {toast && (
+        <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[100] px-5 py-3 rounded-xl shadow-2xl flex items-center gap-2 animate-fade-in-up bg-emerald-500/90 text-white">
+          <CheckCircle className="w-4 h-4" />
+          <span className="text-sm font-medium">{toast}</span>
+        </div>
+      )}
+
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-white">مدیریت سفارشات</h1>
           <p className="text-sm text-white/40 mt-1">{orders.length} سفارش ثبت شده</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2.5 glass rounded-xl text-sm text-white/60">
+        <button className="flex items-center gap-2 px-4 py-2.5 glass rounded-xl text-sm text-white/60 hover:text-white transition-colors">
           <Download className="w-4 h-4" />
           خروجی اکسل
         </button>
@@ -89,17 +120,42 @@ export default function AdminOrders() {
                   </div>
                   <div>
                     <p className="text-sm font-bold text-white">{order.customerName}</p>
-                    <p className="text-xs text-white/30">{order.id} • {order.date}</p>
+                    <p className="text-xs text-white/30">{order.id} - {order.date}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
                   <div className="text-left">
                     <p className="text-lg font-black text-gold-400">{order.total.toLocaleString('fa-IR')} <span className="text-xs text-white/30">تومان</span></p>
                     <p className="text-[10px] text-white/30">{order.paymentMethod}</p>
                   </div>
-                  <span className={`text-xs px-2.5 py-1 rounded-lg ${sc.color}`}>{sc.label}</span>
-                  <button className="w-8 h-8 glass rounded-lg flex items-center justify-center text-white/30 hover:text-white transition-colors">
+                  {/* Status dropdown */}
+                  <div className="relative">
+                    <select
+                      value={order.status}
+                      onChange={(e) => handleStatusChange(order.id, e.target.value as Order['status'])}
+                      className={`appearance-none text-xs px-3 py-1.5 pr-3 pl-8 rounded-lg ${sc.color} outline-none cursor-pointer`}
+                    >
+                      <option value="pending">در انتظار</option>
+                      <option value="processing">در حال پردازش</option>
+                      <option value="shipped">ارسال شده</option>
+                      <option value="delivered">تحویل شده</option>
+                      <option value="cancelled">لغو شده</option>
+                    </select>
+                    <ChevronDown className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 pointer-events-none" />
+                  </div>
+                  <button
+                    onClick={() => setSelectedOrder(order)}
+                    className="w-8 h-8 glass rounded-lg flex items-center justify-center text-white/30 hover:text-white transition-colors"
+                    title="مشاهده جزئیات"
+                  >
                     <Eye className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setDeleteConfirm(order.id)}
+                    className="w-8 h-8 glass rounded-lg flex items-center justify-center text-white/30 hover:text-red-400 transition-colors"
+                    title="حذف سفارش"
+                  >
+                    <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
               </div>
@@ -107,7 +163,7 @@ export default function AdminOrders() {
               <div className="mt-3 pt-3 border-t border-white/5 flex flex-wrap gap-2">
                 {order.items.map((item, i) => (
                   <span key={i} className="text-[10px] px-2 py-1 bg-white/5 rounded-lg text-white/40">
-                    کتاب #{item.bookId} × {item.quantity}
+                    کتاب #{item.bookId} x {item.quantity}
                   </span>
                 ))}
               </div>
@@ -115,6 +171,85 @@ export default function AdminOrders() {
           );
         })}
       </div>
+
+      {/* Order details modal */}
+      {selectedOrder && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setSelectedOrder(null)}>
+          <div className="bg-[#0f0f1a] border border-white/5 rounded-2xl w-full max-w-lg max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="p-5 border-b border-white/5 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-white">جزئیات سفارش</h3>
+              <button onClick={() => setSelectedOrder(null)} className="w-8 h-8 glass rounded-lg flex items-center justify-center text-white/40 hover:text-white">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="glass rounded-xl p-3">
+                  <p className="text-[10px] text-white/30">شماره سفارش</p>
+                  <p className="text-sm font-bold text-white">{selectedOrder.id}</p>
+                </div>
+                <div className="glass rounded-xl p-3">
+                  <p className="text-[10px] text-white/30">تاریخ</p>
+                  <p className="text-sm font-bold text-white">{selectedOrder.date}</p>
+                </div>
+                <div className="glass rounded-xl p-3">
+                  <p className="text-[10px] text-white/30">مشتری</p>
+                  <p className="text-sm font-bold text-white">{selectedOrder.customerName}</p>
+                </div>
+                <div className="glass rounded-xl p-3">
+                  <p className="text-[10px] text-white/30">مبلغ کل</p>
+                  <p className="text-sm font-bold text-gold-400">{selectedOrder.total.toLocaleString('fa-IR')} تومان</p>
+                </div>
+              </div>
+              <div>
+                <p className="text-xs text-white/40 mb-2">آدرس:</p>
+                <p className="text-sm text-white/60">{selectedOrder.address}</p>
+              </div>
+              <div>
+                <p className="text-xs text-white/40 mb-2">روش پرداخت:</p>
+                <p className="text-sm text-white/60">{selectedOrder.paymentMethod}</p>
+              </div>
+              <div>
+                <p className="text-xs text-white/40 mb-2">وضعیت:</p>
+                <select
+                  value={selectedOrder.status}
+                  onChange={(e) => handleStatusChange(selectedOrder.id, e.target.value as Order['status'])}
+                  className="w-full px-3 py-2 bg-white/5 border border-white/5 rounded-xl text-sm text-white outline-none"
+                >
+                  <option value="pending">در انتظار</option>
+                  <option value="processing">در حال پردازش</option>
+                  <option value="shipped">ارسال شده</option>
+                  <option value="delivered">تحویل شده</option>
+                  <option value="cancelled">لغو شده</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete confirmation */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setDeleteConfirm(null)}>
+          <div className="bg-[#0f0f1a] border border-white/5 rounded-2xl w-full max-w-md p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-red-500/10 rounded-xl flex items-center justify-center">
+                <AlertTriangle className="w-5 h-5 text-red-400" />
+              </div>
+              <h3 className="text-lg font-bold text-white">حذف سفارش</h3>
+            </div>
+            <p className="text-sm text-white/50 mb-6">آیا از حذف این سفارش اطمینان دارید؟</p>
+            <div className="flex gap-2">
+              <button onClick={() => handleDelete(deleteConfirm)} className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium text-sm transition-colors">
+                تایید حذف
+              </button>
+              <button onClick={() => setDeleteConfirm(null)} className="flex-1 py-2.5 glass rounded-xl text-sm text-white/60 hover:text-white">
+                انصراف
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
