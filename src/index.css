@@ -1,1 +1,116 @@
 @import "tailwindcss";
+
+@theme {
+  --font-vazir: 'Vazirmatn', sans-serif;
+  --color-primary-50: #f0f7ff;
+  --color-primary-100: #e0effe;
+  --color-primary-200: #b9dffd;
+  --color-primary-300: #7cc5fc;
+  --color-primary-400: #36a9f8;
+  --color-primary-500: #0c8ee9;
+  --color-primary-600: #0070c7;
+  --color-primary-700: #0159a1;
+  --color-primary-800: #064b85;
+  --color-primary-900: #0b3e6e;
+  --color-primary-950: #072749;
+  
+  --color-accent-50: #fdf4f3;
+  --color-accent-100: #fce7e4;
+  --color-accent-200: #fad3cd;
+  --color-accent-300: #f5b3a9;
+  --color-accent-400: #ed8878;
+  --color-accent-500: #e1604d;
+  --color-accent-600: #cd4532;
+  --color-accent-700: #ac3726;
+  --color-accent-800: #8e3123;
+  --color-accent-900: #762e23;
+  --color-accent-950: #40140e;
+
+  --color-warm-50: #fefbf3;
+  --color-warm-100: #fdf5e1;
+  --color-warm-200: #fae8bc;
+  --color-warm-300: #f6d68e;
+  --color-warm-400: #f2be5d;
+  --color-warm-500: #eda53a;
+  --color-warm-600: #de8a2c;
+  --color-warm-700: #b86b25;
+  --color-warm-800: #945525;
+  --color-warm-900: #784621;
+  --color-warm-950: #41230f;
+}
+
+* {
+  font-family: 'Vazirmatn', sans-serif;
+}
+
+body {
+  direction: rtl;
+  background-color: #fafafa;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #0c8ee9;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #0159a1;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.5s ease-out forwards;
+}
+
+/* Book hover effect */
+.book-card:hover .book-cover {
+  transform: scale(1.05) rotateY(-5deg);
+}
+
+.book-cover {
+  transition: transform 0.4s ease;
+  transform-style: preserve-3d;
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #0c8ee9, #0159a1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
