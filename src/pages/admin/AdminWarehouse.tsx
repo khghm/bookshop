@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Package, Plus, Edit, Trash2, Search, AlertTriangle, Check, Download, Upload, MapPin, Box, X } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Package, Plus, Edit, Trash2, Search, AlertTriangle, Check, Download, Upload, MapPin, Box, X, Image as ImageIcon } from 'lucide-react';
 import { useAdmin } from '../../context/AdminContext';
 import { exportToPDF, exportToExcel } from '../../utils/exportUtils';
 
@@ -290,7 +290,23 @@ function WarehouseForm({ item, books, onClose, onSave }: { item: any; books: any
     quantity: 0,
     lastUpdated: new Date().toLocaleDateString('fa-IR'),
     notes: '',
+    imageUrl: '',
   });
+  const [uploadedImage, setUploadedImage] = useState<string | null>(item?.imageUrl || null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64 = reader.result as string;
+        setUploadedImage(base64);
+        setFormData({ ...formData, imageUrl: base64 });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -318,6 +334,33 @@ function WarehouseForm({ item, books, onClose, onSave }: { item: any; books: any
                 <option key={book.id} value={book.id}>{book.title}</option>
               ))}
             </select>
+          </div>
+          <div>
+            <label className="text-xs text-white/40 mb-1.5 block">تصویر محصول</label>
+            <input
+              ref={imageInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="hidden"
+            />
+            <div
+              onClick={() => imageInputRef.current?.click()}
+              className="w-full p-4 bg-white/5 border-2 border-dashed border-white/10 rounded-xl text-center cursor-pointer hover:border-gold-500/30 transition-colors"
+            >
+              {uploadedImage ? (
+                <div className="space-y-2">
+                  <img src={uploadedImage} alt="preview" className="w-20 h-20 object-cover rounded-lg mx-auto" />
+                  <p className="text-xs text-gold-400">کلیک کنید برای تغییر تصویر</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <ImageIcon className="w-8 h-8 text-white/30 mx-auto" />
+                  <p className="text-sm text-white/50">کلیک کنید برای آپلود تصویر</p>
+                  <p className="text-xs text-white/30">فرمت‌های مجاز: JPG, PNG, WebP</p>
+                </div>
+              )}
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>

@@ -26,7 +26,7 @@ export default function AdminBooks() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  const handleExportPDF = () => {
+  const handleExportPDF = async () => {
     const data = filteredBooks.map(b => [
       b.title,
       b.author,
@@ -36,7 +36,7 @@ export default function AdminBooks() {
       b.salesCount.toLocaleString('fa-IR'),
       b.rating.toString(),
     ]);
-    exportToPDF('گزارش کتاب‌ها', ['عنوان', 'نویسنده', 'دسته‌بندی', 'قیمت', 'موجودی', 'فروش', 'امتیاز'], data, 'books-report');
+    await exportToPDF('گزارش کتاب‌ها', ['عنوان', 'نویسنده', 'دسته‌بندی', 'قیمت', 'موجودی', 'فروش', 'امتیاز'], data, 'books-report');
   };
 
   const handleExportExcel = () => {

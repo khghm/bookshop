@@ -34,7 +34,7 @@ export const exportToPDF = async (
         <tbody>
           ${data.map((row, i) => `
             <tr style="background-color: ${i % 2 === 0 ? '#f9f9f9' : '#ffffff'};">
-              ${row.map(cell => `<td style="padding: 8px; border: 1px solid #ddd; text-align: right;">${cell}</td>`).join('')}
+              ${row.map(cell => `<td style="padding: 8px; border: 1px solid #ddd; text-align: right; color: #000000;">${cell}</td>`).join('')}
             </tr>
           `).join('')}
         </tbody>
