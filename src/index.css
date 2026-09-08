@@ -48,6 +48,22 @@ body {
   overflow-x: hidden;
 }
 
+/* Select/Dropdown styling */
+select {
+  background-color: #1a1a2e;
+  color: #ffffff;
+}
+
+select option {
+  background-color: #1a1a2e;
+  color: #ffffff;
+  padding: 8px;
+}
+
+select option:hover {
+  background-color: #2a2a3e;
+}
+
 /* Premium scrollbar */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: #1a1a2e; }
