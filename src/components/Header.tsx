@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, Search, Menu, X, BookOpen, User, Heart } from 'lucide-react';
+import { ShoppingCart, Search, Menu, X, BookOpen, User, Heart, Sparkles } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 
 export default function Header() {
@@ -18,125 +18,132 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-100">
-      {/* Top bar */}
-      <div className="bg-primary-800 text-white text-sm py-2">
-        <div className="max-w-7xl mx-auto px-4 flex justify-between items-center">
-          <span>ارسال رایگان برای سفارش‌های بالای ۵۰۰ هزار تومان 🚚</span>
-          <div className="hidden md:flex gap-4">
+    <header className="sticky top-0 z-50">
+      {/* Top announcement bar */}
+      <div className="bg-gradient-to-l from-brand-900 via-brand-800 to-brand-900 border-b border-white/5">
+        <div className="max-w-7xl mx-auto px-4 py-2 flex justify-between items-center">
+          <div className="flex items-center gap-2 text-xs text-gold-300">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>جشنواره فروش بهاره — تا ۵۰٪ تخفیف روی صدها عنوان کتاب</span>
+          </div>
+          <div className="hidden md:flex items-center gap-4 text-xs text-white/50">
             <span>📞 ۰۲۱-۱۲۳۴۵۶۷۸</span>
-            <span>|</span>
-            <span>پشتیبانی ۲۴ ساعته</span>
+            <span className="w-px h-3 bg-white/20" />
+            <span>ارسال رایگان بالای ۵۰۰ هزار تومان</span>
           </div>
         </div>
       </div>
 
       {/* Main header */}
-      <div className="max-w-7xl mx-auto px-4 py-4">
-        <div className="flex items-center justify-between gap-4">
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 shrink-0">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center">
-              <BookOpen className="w-6 h-6 text-white" />
-            </div>
-            <div className="hidden sm:block">
-              <h1 className="text-xl font-bold text-primary-800">کتاب‌خانه نوین</h1>
-              <p className="text-xs text-gray-500">فروشگاه آنلاین کتاب</p>
-            </div>
-          </Link>
+      <div className="glass border-b border-white/5">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <div className="flex items-center justify-between gap-4">
+            {/* Logo */}
+            <Link to="/" className="flex items-center gap-3 shrink-0 group">
+              <div className="relative">
+                <div className="w-11 h-11 bg-gradient-to-br from-gold-400 to-gold-600 rounded-xl flex items-center justify-center shadow-lg shadow-gold-500/20 group-hover:shadow-gold-500/40 transition-shadow">
+                  <BookOpen className="w-6 h-6 text-brand-950" />
+                </div>
+                <div className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-brand-950 animate-pulse" />
+              </div>
+              <div className="hidden sm:block">
+                <h1 className="text-lg font-black gradient-text-gold">کتاب‌خانه نوین</h1>
+                <p className="text-[10px] text-white/40 -mt-0.5">NOVIN BOOKSTORE</p>
+              </div>
+            </Link>
 
-          {/* Search */}
-          <form onSubmit={handleSearch} className="flex-1 max-w-xl hidden md:block">
+            {/* Search */}
+            <form onSubmit={handleSearch} className="flex-1 max-w-lg hidden md:block">
+              <div className="relative group">
+                <input
+                  type="text"
+                  placeholder="جستجوی کتاب، نویسنده یا ناشر..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full py-2.5 px-4 pr-12 rounded-2xl bg-white/5 border border-white/10 focus:border-gold-500/50 focus:bg-white/8 focus:ring-2 focus:ring-gold-500/10 outline-none transition-all text-sm text-white placeholder-white/30"
+                />
+                <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-gold-400 group-hover:text-gold-300 transition-colors">
+                  <Search className="w-5 h-5" />
+                </button>
+              </div>
+            </form>
+
+            {/* Actions */}
+            <div className="flex items-center gap-2">
+              <Link to="/books" className="hidden lg:flex items-center gap-1.5 px-3 py-2 rounded-xl text-white/50 hover:text-gold-400 hover:bg-white/5 transition-all text-sm">
+                <Heart className="w-4 h-4" />
+                <span>علاقه‌مندی</span>
+              </Link>
+              <Link to="/admin" className="hidden lg:flex items-center gap-1.5 px-3 py-2 rounded-xl text-white/50 hover:text-brand-400 hover:bg-white/5 transition-all text-sm">
+                <User className="w-4 h-4" />
+                <span>پنل مدیریت</span>
+              </Link>
+              <button
+                onClick={() => setIsCartOpen(true)}
+                className="relative flex items-center gap-2 px-4 py-2.5 bg-gradient-to-l from-gold-500 to-gold-600 hover:from-gold-400 hover:to-gold-500 text-brand-950 rounded-xl font-bold text-sm transition-all shadow-lg shadow-gold-500/20 hover:shadow-gold-500/30 btn-premium"
+              >
+                <ShoppingCart className="w-4 h-4" />
+                <span className="hidden sm:inline">سبد خرید</span>
+                {totalItems > 0 && (
+                  <span className="absolute -top-1.5 -left-1.5 w-5 h-5 bg-brand-600 text-white text-[10px] rounded-full flex items-center justify-center font-bold border-2 border-brand-950">
+                    {totalItems}
+                  </span>
+                )}
+              </button>
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="md:hidden text-white/60 hover:text-white p-2"
+              >
+                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
+            </div>
+          </div>
+
+          {/* Mobile search */}
+          <form onSubmit={handleSearch} className="mt-3 md:hidden">
             <div className="relative">
               <input
                 type="text"
-                placeholder="جستجوی کتاب، نویسنده یا ناشر..."
+                placeholder="جستجوی کتاب..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full py-2.5 px-4 pr-12 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition-all text-sm"
+                className="w-full py-2.5 px-4 pr-12 rounded-xl bg-white/5 border border-white/10 focus:border-gold-500/50 outline-none text-sm text-white placeholder-white/30"
               />
-              <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-primary-600 hover:text-primary-700">
-                <Search className="w-5 h-5" />
-              </button>
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
             </div>
           </form>
-
-          {/* Actions */}
-          <div className="flex items-center gap-3">
-            <Link to="/books" className="hidden sm:flex items-center gap-1 text-gray-600 hover:text-primary-600 transition-colors">
-              <Heart className="w-5 h-5" />
-              <span className="text-sm">علاقه‌مندی</span>
-            </Link>
-            <button className="hidden sm:flex items-center gap-1 text-gray-600 hover:text-primary-600 transition-colors">
-              <User className="w-5 h-5" />
-              <span className="text-sm">حساب من</span>
-            </button>
-            <button
-              onClick={() => setIsCartOpen(true)}
-              className="relative flex items-center gap-1 bg-primary-600 hover:bg-primary-700 text-white px-4 py-2.5 rounded-xl transition-colors"
-            >
-              <ShoppingCart className="w-5 h-5" />
-              <span className="hidden sm:inline text-sm">سبد خرید</span>
-              {totalItems > 0 && (
-                <span className="absolute -top-2 -left-2 bg-accent-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
-                  {totalItems}
-                </span>
-              )}
-            </button>
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden text-gray-600"
-            >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
         </div>
 
-        {/* Mobile search */}
-        <form onSubmit={handleSearch} className="mt-3 md:hidden">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="جستجوی کتاب..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full py-2.5 px-4 pr-12 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none transition-all text-sm"
-            />
-            <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-primary-600">
-              <Search className="w-5 h-5" />
-            </button>
+        {/* Navigation */}
+        <div className="border-t border-white/5">
+          <div className="max-w-7xl mx-auto px-4">
+            <nav className={`${mobileMenuOpen ? 'flex' : 'hidden'} md:flex flex-col md:flex-row md:items-center gap-0.5 md:gap-1 py-2 md:py-0`}>
+              {[
+                { to: '/', label: 'صفحه اصلی', icon: '🏠' },
+                { to: '/books', label: 'همه کتاب‌ها', icon: '📚' },
+                { to: '/books?category=fiction', label: 'رمان و داستان', icon: '📖' },
+                { to: '/books?category=self-help', label: 'توسعه فردی', icon: '🌱' },
+                { to: '/books?category=tech', label: 'فناوری', icon: '💻' },
+                { to: '/books?format=digital', label: 'کتاب دیجیتال', icon: '📱', special: true },
+                { to: '/books?sale=true', label: 'تخفیف‌ها', icon: '🏷️', special: true },
+              ].map((item) => (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className={`px-3 py-2 rounded-lg text-sm transition-all ${
+                    item.special
+                      ? 'text-gold-400 hover:bg-gold-500/10'
+                      : 'text-white/60 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <span className="ml-1">{item.icon}</span>
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
           </div>
-        </form>
+        </div>
       </div>
-
-      {/* Navigation */}
-      <nav className="border-t border-gray-100 bg-gray-50/50">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className={`${mobileMenuOpen ? 'flex' : 'hidden'} md:flex flex-col md:flex-row md:items-center gap-1 md:gap-6 py-2 md:py-0`}>
-            <Link to="/" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all">
-              صفحه اصلی
-            </Link>
-            <Link to="/books" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all">
-              همه کتاب‌ها
-            </Link>
-            <Link to="/books?category=fiction" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all">
-              رمان و داستان
-            </Link>
-            <Link to="/books?category=self-help" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all">
-              توسعه فردی
-            </Link>
-            <Link to="/books?category=tech" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-all">
-              فناوری
-            </Link>
-            <Link to="/books?format=digital" className="px-3 py-2 text-sm font-medium text-accent-600 hover:text-accent-700 hover:bg-accent-50 rounded-lg transition-all">
-              📱 کتاب‌های دیجیتال
-            </Link>
-            <Link to="/books?sale=true" className="px-3 py-2 text-sm font-medium text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg transition-all">
-              🏷️ تخفیف‌ها
-            </Link>
-          </div>
-        </div>
-      </nav>
     </header>
   );
 }

@@ -1,332 +1,207 @@
 import { useState, useMemo } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
-import { Search, SlidersHorizontal, Grid3X3, List, X, ShoppingCart } from 'lucide-react';
-import { books, categories, Book } from '../data/books';
+import { useSearchParams } from 'react-router-dom';
+import { Search, Filter, SlidersHorizontal, Grid3X3, List, X, ChevronDown } from 'lucide-react';
+import { books, categories } from '../data/books';
 import BookCard from '../components/BookCard';
-import { useCart } from '../context/CartContext';
 
 export default function BooksPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
+  const [sortBy, setSortBy] = useState('popular');
+  const [priceRange, setPriceRange] = useState(500000);
 
   const searchQuery = searchParams.get('search') || '';
-  const categoryFilter = searchParams.get('category') || '';
-  const formatFilter = searchParams.get('format') || '';
-  const saleFilter = searchParams.get('sale') || '';
-  const sortFilter = searchParams.get('sort') || '';
-
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 500000]);
-  const [localSearch, setLocalSearch] = useState(searchQuery);
+  const selectedCategory = searchParams.get('category') || '';
+  const selectedFormat = searchParams.get('format') || '';
+  const isSale = searchParams.get('sale') === 'true';
 
   const filteredBooks = useMemo(() => {
     let result = [...books];
 
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-      result = result.filter(b =>
-        b.title.toLowerCase().includes(q) ||
-        b.author.toLowerCase().includes(q) ||
-        b.publisher.toLowerCase().includes(q)
-      );
+      result = result.filter(b => b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q));
     }
+    if (selectedCategory) result = result.filter(b => b.category === selectedCategory);
+    if (selectedFormat) result = result.filter(b => b.format === selectedFormat || b.format === 'both');
+    if (isSale) result = result.filter(b => b.discount);
+    result = result.filter(b => b.price <= priceRange);
 
-    if (categoryFilter) {
-      result = result.filter(b => b.category === categoryFilter);
+    switch (sortBy) {
+      case 'price-asc': result.sort((a, b) => a.price - b.price); break;
+      case 'price-desc': result.sort((a, b) => b.price - a.price); break;
+      case 'rating': result.sort((a, b) => b.rating - a.rating); break;
+      case 'newest': result.sort((a, b) => b.publishYear - a.publishYear); break;
+      default: result.sort((a, b) => b.salesCount - a.salesCount);
     }
-
-    if (formatFilter) {
-      result = result.filter(b => b.format === formatFilter || b.format === 'both');
-    }
-
-    if (saleFilter === 'true') {
-      result = result.filter(b => b.discount);
-    }
-
-    if (sortFilter === 'popular') {
-      result.sort((a, b) => b.reviewCount - a.reviewCount);
-    } else if (sortFilter === 'newest') {
-      result.sort((a, b) => b.publishYear - a.publishYear);
-    } else if (sortFilter === 'price-low') {
-      result.sort((a, b) => a.price - b.price);
-    } else if (sortFilter === 'price-high') {
-      result.sort((a, b) => b.price - a.price);
-    } else if (sortFilter === 'rating') {
-      result.sort((a, b) => b.rating - a.rating);
-    }
-
-    result = result.filter(b => b.price >= priceRange[0] && b.price <= priceRange[1]);
-
     return result;
-  }, [searchQuery, categoryFilter, formatFilter, saleFilter, sortFilter, priceRange]);
+  }, [searchQuery, selectedCategory, selectedFormat, isSale, sortBy, priceRange]);
 
-  const updateFilter = (key: string, value: string) => {
+  const toggleCategory = (cat: string) => {
     const params = new URLSearchParams(searchParams);
-    if (value) {
-      params.set(key, value);
-    } else {
-      params.delete(key);
-    }
+    if (selectedCategory === cat) params.delete('category');
+    else params.set('category', cat);
     setSearchParams(params);
   };
 
-  const clearFilters = () => {
-    setSearchParams({});
-    setPriceRange([0, 500000]);
-    setLocalSearch('');
+  const toggleFormat = (fmt: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (selectedFormat === fmt) params.delete('format');
+    else params.set('format', fmt);
+    setSearchParams(params);
   };
 
-  const activeFiltersCount = [categoryFilter, formatFilter, saleFilter, sortFilter].filter(Boolean).length;
+  const clearFilters = () => setSearchParams({});
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      {/* Page header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-black text-gray-800">
-          {categoryFilter
-            ? categories.find(c => c.id === categoryFilter)?.name || 'کتاب‌ها'
-            : saleFilter === 'true'
-            ? 'تخفیف‌های ویژه'
-            : searchQuery
-            ? `نتایج جستجو: "${searchQuery}"`
-            : 'همه کتاب‌ها'
-          }
-        </h1>
-        <p className="text-gray-500 mt-1">{filteredBooks.length} عنوان کتاب یافت شد</p>
-      </div>
-
-      {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-3 mb-6">
-        <div className="relative flex-1 min-w-[200px] max-w-md">
-          <input
-            type="text"
-            placeholder="جستجو در نتایج..."
-            value={localSearch}
-            onChange={(e) => {
-              setLocalSearch(e.target.value);
-              updateFilter('search', e.target.value);
-            }}
-            className="w-full py-2.5 px-4 pr-10 rounded-xl border border-gray-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-100 outline-none text-sm"
-          />
-          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-3xl font-black text-white">
+            {selectedCategory ? categories.find(c => c.id === selectedCategory)?.name : 'همه کتاب‌ها'}
+          </h1>
+          <p className="text-sm text-white/40 mt-1">{filteredBooks.length} عنوان کتاب</p>
         </div>
-
-        <button
-          onClick={() => setShowFilters(!showFilters)}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-medium transition-all ${
-            showFilters || activeFiltersCount > 0
-              ? 'border-primary-500 bg-primary-50 text-primary-700'
-              : 'border-gray-200 text-gray-600 hover:border-primary-300'
-          }`}
-        >
-          <SlidersHorizontal className="w-4 h-4" />
-          فیلترها
-          {activeFiltersCount > 0 && (
-            <span className="w-5 h-5 bg-primary-600 text-white text-xs rounded-full flex items-center justify-center">
-              {activeFiltersCount}
-            </span>
-          )}
-        </button>
-
-        <select
-          value={sortFilter}
-          onChange={(e) => updateFilter('sort', e.target.value)}
-          className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-600 outline-none focus:border-primary-500"
-        >
-          <option value="">مرتب‌سازی</option>
-          <option value="popular">محبوب‌ترین</option>
-          <option value="newest">جدیدترین</option>
-          <option value="price-low">ارزان‌ترین</option>
-          <option value="price-high">گران‌ترین</option>
-          <option value="rating">بالاترین امتیاز</option>
-        </select>
-
-        <div className="hidden sm:flex items-center border border-gray-200 rounded-xl overflow-hidden">
+        <div className="flex items-center gap-2">
           <button
-            onClick={() => setViewMode('grid')}
-            className={`p-2.5 ${viewMode === 'grid' ? 'bg-primary-50 text-primary-600' : 'text-gray-400 hover:text-gray-600'}`}
+            onClick={() => setShowFilters(!showFilters)}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm transition-all ${showFilters ? 'bg-gold-500/20 text-gold-400 border border-gold-500/30' : 'glass text-white/60 hover:text-white'}`}
           >
-            <Grid3X3 className="w-4 h-4" />
+            <SlidersHorizontal className="w-4 h-4" />
+            فیلترها
           </button>
-          <button
-            onClick={() => setViewMode('list')}
-            className={`p-2.5 ${viewMode === 'list' ? 'bg-primary-50 text-primary-600' : 'text-gray-400 hover:text-gray-600'}`}
-          >
-            <List className="w-4 h-4" />
-          </button>
+          <div className="relative">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="appearance-none px-4 py-2.5 pr-10 glass rounded-xl text-sm text-white/60 outline-none cursor-pointer"
+            >
+              <option value="popular">محبوب‌ترین</option>
+              <option value="newest">جدیدترین</option>
+              <option value="price-asc">ارزان‌ترین</option>
+              <option value="price-desc">گران‌ترین</option>
+              <option value="rating">بالاترین امتیاز</option>
+            </select>
+            <ChevronDown className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 pointer-events-none" />
+          </div>
+          <div className="hidden md:flex gap-1 glass rounded-xl p-1">
+            <button onClick={() => setViewMode('grid')} className={`p-2 rounded-lg ${viewMode === 'grid' ? 'bg-white/10 text-white' : 'text-white/30'}`}>
+              <Grid3X3 className="w-4 h-4" />
+            </button>
+            <button onClick={() => setViewMode('list')} className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-white/10 text-white' : 'text-white/30'}`}>
+              <List className="w-4 h-4" />
+            </button>
+          </div>
         </div>
-
-        {activeFiltersCount > 0 && (
-          <button
-            onClick={clearFilters}
-            className="flex items-center gap-1 text-sm text-red-500 hover:text-red-600"
-          >
-            <X className="w-4 h-4" />
-            حذف فیلترها
-          </button>
-        )}
       </div>
 
       {/* Filters panel */}
       {showFilters && (
-        <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6 animate-fade-in-up">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="glass rounded-2xl p-6 mb-8 animate-fade-in-up">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-bold text-white flex items-center gap-2">
+              <Filter className="w-4 h-4 text-gold-400" />
+              فیلترها
+            </h3>
+            <button onClick={clearFilters} className="text-xs text-white/40 hover:text-red-400 flex items-center gap-1">
+              <X className="w-3 h-3" /> حذف فیلترها
+            </button>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
             <div>
-              <h4 className="font-bold text-sm text-gray-800 mb-3">دسته‌بندی</h4>
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" name="category" checked={!categoryFilter} onChange={() => updateFilter('category', '')} className="accent-primary-600" />
-                  <span className="text-sm text-gray-600">همه دسته‌ها</span>
-                </label>
+              <h4 className="text-xs text-white/40 mb-2">دسته‌بندی</h4>
+              <div className="flex flex-wrap gap-1.5">
                 {categories.map(cat => (
-                  <label key={cat.id} className="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" name="category" checked={categoryFilter === cat.id} onChange={() => updateFilter('category', cat.id)} className="accent-primary-600" />
-                    <span className="text-sm text-gray-600">{cat.icon} {cat.name}</span>
-                  </label>
+                  <button
+                    key={cat.id}
+                    onClick={() => toggleCategory(cat.id)}
+                    className={`px-3 py-1.5 rounded-lg text-xs transition-all ${selectedCategory === cat.id ? 'bg-gold-500/20 text-gold-400 border border-gold-500/30' : 'bg-white/5 text-white/40 hover:text-white'}`}
+                  >
+                    {cat.icon} {cat.name}
+                  </button>
                 ))}
               </div>
             </div>
-
             <div>
-              <h4 className="font-bold text-sm text-gray-800 mb-3">نوع کتاب</h4>
-              <div className="space-y-2">
-                {[
-                  { value: '', label: 'همه' },
-                  { value: 'paper', label: '📖 کاغذی' },
-                  { value: 'digital', label: '📱 دیجیتال' },
-                  { value: 'both', label: '📖📱 هر دو' },
-                ].map(opt => (
-                  <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" name="format" checked={formatFilter === opt.value} onChange={() => updateFilter('format', opt.value)} className="accent-primary-600" />
-                    <span className="text-sm text-gray-600">{opt.label}</span>
-                  </label>
+              <h4 className="text-xs text-white/40 mb-2">فرمت</h4>
+              <div className="flex flex-wrap gap-1.5">
+                {[{ id: 'paper', label: '📖 کاغذی' }, { id: 'digital', label: '📱 دیجیتال' }].map(fmt => (
+                  <button
+                    key={fmt.id}
+                    onClick={() => toggleFormat(fmt.id)}
+                    className={`px-3 py-1.5 rounded-lg text-xs transition-all ${selectedFormat === fmt.id ? 'bg-gold-500/20 text-gold-400 border border-gold-500/30' : 'bg-white/5 text-white/40 hover:text-white'}`}
+                  >
+                    {fmt.label}
+                  </button>
                 ))}
               </div>
             </div>
-
             <div>
-              <h4 className="font-bold text-sm text-gray-800 mb-3">محدوده قیمت</h4>
-              <div className="space-y-3">
-                <input
-                  type="range"
-                  min="0"
-                  max="500000"
-                  step="10000"
-                  value={priceRange[1]}
-                  onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
-                  className="w-full accent-primary-600"
-                />
-                <div className="flex justify-between text-xs text-gray-500">
-                  <span>{priceRange[0].toLocaleString('fa-IR')} تومان</span>
-                  <span>{priceRange[1].toLocaleString('fa-IR')} تومان</span>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <h4 className="font-bold text-sm text-gray-800 mb-3">تخفیف</h4>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={saleFilter === 'true'}
-                  onChange={(e) => updateFilter('sale', e.target.checked ? 'true' : '')}
-                  className="accent-primary-600 w-4 h-4"
-                />
-                <span className="text-sm text-gray-600">فقط کتاب‌های تخفیف‌دار</span>
-              </label>
+              <h4 className="text-xs text-white/40 mb-2">محدوده قیمت</h4>
+              <input
+                type="range"
+                min={0}
+                max={500000}
+                step={10000}
+                value={priceRange}
+                onChange={(e) => setPriceRange(Number(e.target.value))}
+                className="w-full mt-2"
+              />
+              <p className="text-xs text-white/40 mt-1">تا {priceRange.toLocaleString('fa-IR')} تومان</p>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Active filters */}
+      {(selectedCategory || selectedFormat || isSale || searchQuery) && (
+        <div className="flex flex-wrap gap-2 mb-6">
+          {searchQuery && (
+            <span className="px-3 py-1 glass rounded-lg text-xs text-white/60">
+              جستجو: "{searchQuery}"
+              <button onClick={() => { const p = new URLSearchParams(searchParams); p.delete('search'); setSearchParams(p); }} className="mr-1 text-white/30 hover:text-red-400">×</button>
+            </span>
+          )}
+          {selectedCategory && (
+            <span className="px-3 py-1 bg-gold-500/10 border border-gold-500/20 rounded-lg text-xs text-gold-400">
+              {categories.find(c => c.id === selectedCategory)?.name}
+              <button onClick={() => toggleCategory(selectedCategory)} className="mr-1 text-gold-400/50 hover:text-red-400">×</button>
+            </span>
+          )}
+          {selectedFormat && (
+            <span className="px-3 py-1 bg-brand-500/10 border border-brand-500/20 rounded-lg text-xs text-brand-400">
+              {selectedFormat === 'digital' ? 'دیجیتال' : 'کاغذی'}
+              <button onClick={() => toggleFormat(selectedFormat)} className="mr-1 text-brand-400/50 hover:text-red-400">×</button>
+            </span>
+          )}
+          {isSale && (
+            <span className="px-3 py-1 bg-red-500/10 border border-red-500/20 rounded-lg text-xs text-red-400">
+              تخفیف‌دار
+              <button onClick={() => { const p = new URLSearchParams(searchParams); p.delete('sale'); setSearchParams(p); }} className="mr-1 text-red-400/50 hover:text-red-400">×</button>
+            </span>
+          )}
         </div>
       )}
 
       {/* Books grid */}
       {filteredBooks.length > 0 ? (
-        <div className={viewMode === 'grid'
-          ? 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4'
-          : 'space-y-4'
-        }>
-          {filteredBooks.map(book => (
-            viewMode === 'grid' ? (
-              <BookCard key={book.id} book={book} />
-            ) : (
-              <BookListItem key={book.id} book={book} />
-            )
+        <div className={`grid gap-4 ${viewMode === 'grid' ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5' : 'grid-cols-1 md:grid-cols-2'}`}>
+          {filteredBooks.map((book, i) => (
+            <BookCard key={book.id} book={book} index={i} />
           ))}
         </div>
       ) : (
-        <div className="text-center py-16">
-          <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Search className="w-10 h-10 text-gray-300" />
-          </div>
-          <h3 className="text-lg font-bold text-gray-600">کتابی یافت نشد</h3>
-          <p className="text-sm text-gray-400 mt-1">لطفاً فیلترهای خود را تغییر دهید</p>
-          <button
-            onClick={clearFilters}
-            className="mt-4 px-6 py-2 bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-700 transition-colors"
-          >
+        <div className="text-center py-20">
+          <div className="text-5xl mb-4">📚</div>
+          <h3 className="text-lg font-bold text-white/60">کتابی یافت نشد</h3>
+          <p className="text-sm text-white/30 mt-1">فیلترهای خود را تغییر دهید</p>
+          <button onClick={clearFilters} className="mt-4 px-6 py-2 bg-gold-500/20 text-gold-400 rounded-xl text-sm">
             حذف فیلترها
           </button>
         </div>
       )}
-    </div>
-  );
-}
-
-function BookListItem({ book }: { book: Book }) {
-  const { addToCart } = useCart();
-  const [added, setAdded] = useState(false);
-
-  const handleAddToCart = () => {
-    addToCart(book, book.format === 'digital' ? 'digital' : 'paper');
-    setAdded(true);
-    setTimeout(() => setAdded(false), 2000);
-  };
-
-  const formatPrice = (price: number) => price.toLocaleString('fa-IR');
-
-  return (
-    <div className="flex gap-4 bg-white rounded-xl border border-gray-100 hover:border-primary-200 hover:shadow-md transition-all p-4">
-      <Link to={`/book/${book.id}`} className="shrink-0">
-        <img src={book.cover} alt={book.title} className="w-20 h-28 object-cover rounded-lg" />
-      </Link>
-      <div className="flex-1">
-        <Link to={`/book/${book.id}`}>
-          <h3 className="font-bold text-gray-800 hover:text-primary-600 transition-colors">{book.title}</h3>
-        </Link>
-        <p className="text-sm text-gray-500">{book.author}</p>
-        <div className="flex items-center gap-2 mt-2">
-          <span className="text-xs bg-primary-50 text-primary-700 px-2 py-0.5 rounded">
-            {categories.find(c => c.id === book.category)?.name}
-          </span>
-          <span className="text-xs text-gray-400">⭐ {book.rating}</span>
-          <span className={`text-xs px-1.5 py-0.5 rounded ${
-            book.format === 'digital' ? 'bg-purple-100 text-purple-700' :
-            book.format === 'both' ? 'bg-blue-100 text-blue-700' :
-            'bg-gray-100 text-gray-600'
-          }`}>
-            {book.format === 'digital' ? 'دیجیتال' : book.format === 'both' ? 'کاغذی + دیجیتال' : 'کاغذی'}
-          </span>
-        </div>
-        <div className="flex items-center justify-between mt-3">
-          <div>
-            {book.originalPrice && (
-              <span className="text-xs text-gray-400 line-through ml-2">
-                {formatPrice(book.originalPrice)}
-              </span>
-            )}
-            <span className="font-bold text-primary-700">{formatPrice(book.price)} تومان</span>
-          </div>
-          <button
-            onClick={handleAddToCart}
-            className={`flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-              added ? 'bg-green-500 text-white' : 'bg-primary-600 hover:bg-primary-700 text-white'
-            }`}
-          >
-            <ShoppingCart className="w-4 h-4" />
-            {added ? 'اضافه شد' : 'افزودن به سبد'}
-          </button>
-        </div>
-      </div>
     </div>
   );
 }

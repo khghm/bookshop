@@ -18,6 +18,32 @@ export interface Book {
   bestseller?: boolean;
   newArrival?: boolean;
   discount?: number;
+  stock: number;
+  salesCount: number;
+}
+
+export interface Order {
+  id: string;
+  customerName: string;
+  customerEmail: string;
+  items: { bookId: number; quantity: number; format: string; price: number }[];
+  total: number;
+  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  date: string;
+  address: string;
+  paymentMethod: string;
+}
+
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  joinDate: string;
+  totalOrders: number;
+  totalSpent: number;
+  status: 'active' | 'inactive' | 'banned';
+  avatar: string;
 }
 
 export const categories = [
@@ -38,7 +64,7 @@ export const books: Book[] = [
     author: 'صادق هدایت',
     price: 85000,
     originalPrice: 120000,
-    cover: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=300&h=400&fit=crop',
+    cover: 'https://image.qwenlm.ai/generated-images/47668d80-9acc-4c84-8a2d-ad9b5e6f81a0/_result.png',
     category: 'fiction',
     format: 'both',
     rating: 4.8,
@@ -51,6 +77,8 @@ export const books: Book[] = [
     language: 'فارسی',
     bestseller: true,
     discount: 29,
+    stock: 45,
+    salesCount: 1250,
   },
   {
     id: 2,
@@ -58,7 +86,7 @@ export const books: Book[] = [
     author: 'محمود دولت‌آبادی',
     price: 245000,
     originalPrice: 320000,
-    cover: 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=300&h=400&fit=crop',
+    cover: 'https://image.qwenlm.ai/generated-images/c0bb4e76-9c58-45e2-9b42-3ded37692c5f/_result.png',
     category: 'fiction',
     format: 'paper',
     rating: 4.9,
@@ -71,13 +99,15 @@ export const books: Book[] = [
     language: 'فارسی',
     bestseller: true,
     discount: 23,
+    stock: 28,
+    salesCount: 890,
   },
   {
     id: 3,
     title: 'تاریخ ایران کمبریج',
     author: 'پیتر آوری و همکاران',
     price: 380000,
-    cover: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=400&fit=crop',
+    cover: 'https://image.qwenlm.ai/generated-images/5525d386-9e00-43bc-8f74-20099b77a941/_result.png',
     category: 'history',
     format: 'paper',
     rating: 4.6,
@@ -89,6 +119,8 @@ export const books: Book[] = [
     isbn: '978-964-445-234-6',
     language: 'فارسی',
     newArrival: true,
+    stock: 15,
+    salesCount: 340,
   },
   {
     id: 4,
@@ -96,7 +128,7 @@ export const books: Book[] = [
     author: 'دارن هاردی',
     price: 95000,
     originalPrice: 130000,
-    cover: 'https://images.unsplash.com/photo-1589998059171-988d887df646?w=300&h=400&fit=crop',
+    cover: 'https://image.qwenlm.ai/generated-images/2a952afe-7b0d-4e8e-b929-3a3a77570c40/_result.png',
     category: 'self-help',
     format: 'both',
     rating: 4.5,
@@ -109,13 +141,15 @@ export const books: Book[] = [
     language: 'فارسی',
     bestseller: true,
     discount: 27,
+    stock: 120,
+    salesCount: 2100,
   },
   {
     id: 5,
     title: 'شازده کوچولو',
     author: 'آنتوان دو سنت‌اگزوپری',
     price: 65000,
-    cover: 'https://images.unsplash.com/photo-1512820790803-83ca734a7942?w=300&h=400&fit=crop',
+    cover: 'https://image.qwenlm.ai/generated-images/cfbd8910-3831-4264-8b5a-e119db79d5e9/_result.png',
     category: 'children',
     format: 'both',
     rating: 4.9,
@@ -127,6 +161,8 @@ export const books: Book[] = [
     isbn: '978-964-363-456-8',
     language: 'فارسی',
     bestseller: true,
+    stock: 200,
+    salesCount: 3500,
   },
   {
     id: 6,
@@ -134,7 +170,7 @@ export const books: Book[] = [
     author: 'رولف دوبلی',
     price: 110000,
     originalPrice: 145000,
-    cover: 'https://images.unsplash.com/photo-1524578271613-d550eacf6090?w=300&h=400&fit=crop',
+    cover: 'https://image.qwenlm.ai/generated-images/3b37b173-a82c-4ee9-8d39-b50f0028ddcc/_result.png',
     category: 'self-help',
     format: 'digital',
     rating: 4.4,
@@ -146,13 +182,15 @@ export const books: Book[] = [
     isbn: '978-622-7745-89-2',
     language: 'فارسی',
     discount: 24,
+    stock: 999,
+    salesCount: 1800,
   },
   {
     id: 7,
     title: 'مبانی برنامه‌نویسی پایتون',
     author: 'اریک متز',
     price: 185000,
-    cover: 'https://images.unsplash.com/photo-1515879218367-8466d910auj7?w=300&h=400&fit=crop',
+    cover: 'https://image.qwenlm.ai/generated-images/a090bbe9-46d4-402d-b740-4fd1084c22a5/_result.png',
     category: 'tech',
     format: 'both',
     rating: 4.7,
@@ -164,13 +202,15 @@ export const books: Book[] = [
     isbn: '978-964-567-789-3',
     language: 'فارسی',
     newArrival: true,
+    stock: 60,
+    salesCount: 560,
   },
   {
     id: 8,
     title: 'فوتیسم و فلسفه شرق',
     author: 'ویلیام چیتیک',
     price: 165000,
-    cover: 'https://images.unsplash.com/photo-1541963463532-d68292c34b19?w=300&h=400&fit=crop',
+    cover: 'https://image.qwenlm.ai/generated-images/6a2a9767-fb42-4f3e-a01c-06174e2f66a6/_result.png',
     category: 'philosophy',
     format: 'paper',
     rating: 4.3,
@@ -181,6 +221,8 @@ export const books: Book[] = [
     publishYear: 1397,
     isbn: '978-964-876-234-1',
     language: 'فارسی',
+    stock: 35,
+    salesCount: 420,
   },
   {
     id: 9,
@@ -188,7 +230,7 @@ export const books: Book[] = [
     author: 'گابریل گارسیا مارکز',
     price: 175000,
     originalPrice: 220000,
-    cover: 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=300&h=400&fit=crop',
+    cover: 'https://image.qwenlm.ai/generated-images/47668d80-9acc-4c84-8a2d-ad9b5e6f81a0/_result.png',
     category: 'fiction',
     format: 'both',
     rating: 4.8,
@@ -201,13 +243,15 @@ export const books: Book[] = [
     language: 'فارسی',
     bestseller: true,
     discount: 20,
+    stock: 75,
+    salesCount: 1650,
   },
   {
     id: 10,
     title: 'نقاشی رنگ روغن برای مبتدیان',
     author: 'مریم احمدی',
     price: 220000,
-    cover: 'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=300&h=400&fit=crop',
+    cover: 'https://image.qwenlm.ai/generated-images/2a952afe-7b0d-4e8e-b929-3a3a77570c40/_result.png',
     category: 'art',
     format: 'both',
     rating: 4.6,
@@ -219,6 +263,8 @@ export const books: Book[] = [
     isbn: '978-964-890-123-5',
     language: 'فارسی',
     newArrival: true,
+    stock: 40,
+    salesCount: 280,
   },
   {
     id: 11,
@@ -226,7 +272,7 @@ export const books: Book[] = [
     author: 'استیون هاوکینگ',
     price: 145000,
     originalPrice: 180000,
-    cover: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?w=300&h=400&fit=crop',
+    cover: 'https://image.qwenlm.ai/generated-images/cfbd8910-3831-4264-8b5a-e119db79d5e9/_result.png',
     category: 'science',
     format: 'digital',
     rating: 4.7,
@@ -239,13 +285,15 @@ export const books: Book[] = [
     language: 'فارسی',
     bestseller: true,
     discount: 19,
+    stock: 999,
+    salesCount: 1400,
   },
   {
     id: 12,
     title: 'دیوان حافظ',
     author: 'حافظ شیرازی',
     price: 195000,
-    cover: 'https://images.unsplash.com/photo-1476275466078-4007374efbbe?w=300&h=400&fit=crop',
+    cover: 'https://image.qwenlm.ai/generated-images/c0bb4e76-9c58-45e2-9b42-3ded37692c5f/_result.png',
     category: 'art',
     format: 'paper',
     rating: 5.0,
@@ -257,5 +305,44 @@ export const books: Book[] = [
     isbn: '978-964-185-234-6',
     language: 'فارسی',
     bestseller: true,
+    stock: 55,
+    salesCount: 2800,
   },
+];
+
+export const orders: Order[] = [
+  { id: 'ORD-1001', customerName: 'علی محمدی', customerEmail: 'ali@email.com', items: [{ bookId: 1, quantity: 2, format: 'paper', price: 85000 }], total: 170000, status: 'delivered', date: '۱۴۰۳/۰۳/۱۵', address: 'تهران، خیابان ولیعصر', paymentMethod: 'آنلاین' },
+  { id: 'ORD-1002', customerName: 'مریم حسینی', customerEmail: 'maryam@email.com', items: [{ bookId: 4, quantity: 1, format: 'digital', price: 66500 }, { bookId: 6, quantity: 1, format: 'digital', price: 77000 }], total: 143500, status: 'shipped', date: '۱۴۰۳/۰۳/۱۴', address: 'اصفهان، خیابان چهارباغ', paymentMethod: 'آنلاین' },
+  { id: 'ORD-1003', customerName: 'رضا کریمی', customerEmail: 'reza@email.com', items: [{ bookId: 2, quantity: 1, format: 'paper', price: 245000 }], total: 245000, status: 'processing', date: '۱۴۰۳/۰۳/۱۳', address: 'شیراز، بلوار زند', paymentMethod: 'کارت به کارت' },
+  { id: 'ORD-1004', customerName: 'فاطمه احمدی', customerEmail: 'fatemeh@email.com', items: [{ bookId: 5, quantity: 3, format: 'paper', price: 65000 }], total: 195000, status: 'pending', date: '۱۴۰۳/۰۳/۱۲', address: 'مشهد، بلوار وکیل‌آباد', paymentMethod: 'درگاه آنلاین' },
+  { id: 'ORD-1005', customerName: 'حسین رضایی', customerEmail: 'hossein@email.com', items: [{ bookId: 9, quantity: 1, format: 'paper', price: 175000 }, { bookId: 12, quantity: 1, format: 'paper', price: 195000 }], total: 370000, status: 'delivered', date: '۱۴۰۳/۰۳/۱۰', address: 'تبریز، خیابان آزادی', paymentMethod: 'آنلاین' },
+  { id: 'ORD-1006', customerName: 'زهرا نوری', customerEmail: 'zahra@email.com', items: [{ bookId: 7, quantity: 1, format: 'digital', price: 129500 }], total: 129500, status: 'delivered', date: '۱۴۰۳/۰۳/۰۹', address: 'کرج، مهرشهر', paymentMethod: 'آنلاین' },
+  { id: 'ORD-1007', customerName: 'امیر جعفری', customerEmail: 'amir@email.com', items: [{ bookId: 11, quantity: 2, format: 'digital', price: 101500 }], total: 203000, status: 'cancelled', date: '۱۴۰۳/۰۳/۰۸', address: 'اهواز، کیانپارس', paymentMethod: 'آنلاین' },
+  { id: 'ORD-1008', customerName: 'سارا موسوی', customerEmail: 'sara@email.com', items: [{ bookId: 3, quantity: 1, format: 'paper', price: 380000 }], total: 380000, status: 'shipped', date: '۱۴۰۳/۰۳/۰۷', address: 'قم، بلوار امین', paymentMethod: 'کارت به کارت' },
+];
+
+export const users: User[] = [
+  { id: 1, name: 'علی محمدی', email: 'ali@email.com', phone: '۰۹۱۲۱۲۳۴۵۶۷', joinDate: '۱۴۰۲/۰۶/۱۵', totalOrders: 12, totalSpent: 2450000, status: 'active', avatar: 'ع' },
+  { id: 2, name: 'مریم حسینی', email: 'maryam@email.com', phone: '۰۹۱۳۲۳۴۵۶۷۸', joinDate: '۱۴۰۲/۰۸/۲۰', totalOrders: 8, totalSpent: 1850000, status: 'active', avatar: 'م' },
+  { id: 3, name: 'رضا کریمی', email: 'reza@email.com', phone: '۰۹۱۴۳۴۵۶۷۸۹', joinDate: '۱۴۰۲/۱۰/۰۵', totalOrders: 5, totalSpent: 980000, status: 'active', avatar: 'ر' },
+  { id: 4, name: 'فاطمه احمدی', email: 'fatemeh@email.com', phone: '۰۹۱۵۴۵۶۷۸۹۰', joinDate: '۱۴۰۳/۰۱/۱۰', totalOrders: 3, totalSpent: 520000, status: 'active', avatar: 'ف' },
+  { id: 5, name: 'حسین رضایی', email: 'hossein@email.com', phone: '۰۹۱۶۵۶۷۸۹۰۱', joinDate: '۱۴۰۲/۰۴/۲۲', totalOrders: 18, totalSpent: 4200000, status: 'active', avatar: 'ح' },
+  { id: 6, name: 'زهرا نوری', email: 'zahra@email.com', phone: '۰۹۱۷۶۷۸۹۰۱۲', joinDate: '۱۴۰۳/۰۲/۰۱', totalOrders: 2, totalSpent: 350000, status: 'inactive', avatar: 'ز' },
+  { id: 7, name: 'امیر جعفری', email: 'amir@email.com', phone: '۰۹۱۸۷۸۹۰۱۲۳', joinDate: '۱۴۰۲/۱۲/۱۵', totalOrders: 7, totalSpent: 1200000, status: 'active', avatar: 'ا' },
+  { id: 8, name: 'سارا موسوی', email: 'sara@email.com', phone: '۰۹۱۹۸۹۰۱۲۳۴', joinDate: '۱۴۰۳/۰۳/۰۱', totalOrders: 1, totalSpent: 380000, status: 'banned', avatar: 'س' },
+];
+
+export const salesData = [
+  { month: 'فروردین', sales: 45, revenue: 12500000 },
+  { month: 'اردیبهشت', sales: 52, revenue: 15800000 },
+  { month: 'خرداد', sales: 61, revenue: 18200000 },
+  { month: 'تیر', sales: 48, revenue: 14500000 },
+  { month: 'مرداد', sales: 55, revenue: 16800000 },
+  { month: 'شهریور', sales: 72, revenue: 22000000 },
+  { month: 'مهر', sales: 68, revenue: 20500000 },
+  { month: 'آبان', sales: 80, revenue: 25000000 },
+  { month: 'آذر', sales: 75, revenue: 23500000 },
+  { month: 'دی', sales: 65, revenue: 19800000 },
+  { month: 'بهمن', sales: 90, revenue: 28000000 },
+  { month: 'اسفند', sales: 95, revenue: 30500000 },
 ];
