@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { DollarSign, Plus, Trash2, Search, AlertTriangle, Check, Download, TrendingUp, TrendingDown, Filter, X } from 'lucide-react';
+import { DollarSign, Plus, Trash2, Search, AlertTriangle, Check, Download, TrendingUp, TrendingDown, Filter, X, Calendar, FileText, BarChart3, PieChart } from 'lucide-react';
 import { useAdmin } from '../../context/AdminContext';
 import { exportToPDF, exportToExcel } from '../../utils/exportUtils';
 
@@ -12,8 +12,8 @@ export default function AdminAccounting() {
   const [toast, setToast] = useState<string | null>(null);
 
   const filteredTransactions = transactions.filter(t => {
+    if (searchQuery && !t.description.includes(searchQuery) && !(t.referenceNumber || '').includes(searchQuery)) return false;
     if (typeFilter && t.type !== typeFilter) return false;
-    if (searchQuery && !t.description.includes(searchQuery) && !t.category.includes(searchQuery)) return false;
     return true;
   });
 
@@ -34,8 +34,8 @@ export default function AdminAccounting() {
 
   const handleSave = (transactionData: any) => {
     addTransaction(transactionData);
-    setShowForm(false);
     showToast('تراکنش جدید ثبت شد');
+    setShowForm(false);
   };
 
   const handleExportPDF = () => {
@@ -45,9 +45,9 @@ export default function AdminAccounting() {
       t.category,
       t.description,
       t.amount.toLocaleString('fa-IR'),
-      t.reference,
+      t.referenceNumber || '-',
     ]);
-    exportToPDF('گزارش حسابداری', ['تاریخ', 'نوع', 'دسته‌بندی', 'توضیحات', 'مبلغ', 'مرجع'], data, 'accounting-report');
+    exportToPDF('گزارش حسابداری', ['تاریخ', 'نوع', 'دسته‌بندی', 'توضیحات', 'مبلغ (تومان)', 'شماره مرجع'], data, 'accounting-report');
   };
 
   const handleExportExcel = () => {
@@ -57,7 +57,7 @@ export default function AdminAccounting() {
       'دسته‌بندی': t.category,
       'توضیحات': t.description,
       'مبلغ (تومان)': t.amount,
-      'مرجع': t.reference,
+      'شماره مرجع': t.referenceNumber || '-',
     }));
     exportToExcel(data, 'accounting-report', 'حسابداری');
   };
@@ -73,15 +73,15 @@ export default function AdminAccounting() {
 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-black text-white">حسابداری فروشگاه</h1>
+          <h1 className="text-2xl font-black text-white">حسابداری و مالی</h1>
           <p className="text-sm text-white/40 mt-1">مدیریت تراکنش‌ها و گزارشات مالی</p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={handleExportPDF} className="flex items-center gap-2 px-4 py-2.5 glass rounded-xl text-sm text-white/60 hover:text-white">
+          <button onClick={handleExportPDF} className="flex items-center gap-2 px-4 py-2.5 glass rounded-xl text-sm text-white/60 hover:text-white transition-colors">
             <Download className="w-4 h-4" />
             PDF
           </button>
-          <button onClick={handleExportExcel} className="flex items-center gap-2 px-4 py-2.5 glass rounded-xl text-sm text-white/60 hover:text-white">
+          <button onClick={handleExportExcel} className="flex items-center gap-2 px-4 py-2.5 glass rounded-xl text-sm text-white/60 hover:text-white transition-colors">
             <Download className="w-4 h-4" />
             Excel
           </button>
@@ -95,66 +95,77 @@ export default function AdminAccounting() {
         </div>
       </div>
 
-      {/* Stats */}
+      {/* Financial Summary */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="glass rounded-xl p-5">
+        <div className="glass rounded-2xl p-5">
           <div className="flex items-center justify-between mb-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-xl flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center">
+              <TrendingUp className="w-5 h-5 text-emerald-400" />
             </div>
             <span className="text-xs text-emerald-400">کل درآمد</span>
           </div>
           <p className="text-2xl font-black text-emerald-400">{totalIncome.toLocaleString('fa-IR')}</p>
           <p className="text-xs text-white/30 mt-1">تومان</p>
         </div>
-        <div className="glass rounded-xl p-5">
+        <div className="glass rounded-2xl p-5">
           <div className="flex items-center justify-between mb-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-700 rounded-xl flex items-center justify-center">
-              <TrendingDown className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 bg-red-500/10 rounded-xl flex items-center justify-center">
+              <TrendingDown className="w-5 h-5 text-red-400" />
             </div>
-            <span className="text-xs text-red-400">کل هزینه‌ها</span>
+            <span className="text-xs text-red-400">کل هزینه</span>
           </div>
           <p className="text-2xl font-black text-red-400">{totalExpense.toLocaleString('fa-IR')}</p>
           <p className="text-xs text-white/30 mt-1">تومان</p>
         </div>
-        <div className="glass rounded-xl p-5">
+        <div className="glass rounded-2xl p-5">
           <div className="flex items-center justify-between mb-3">
-            <div className={`w-10 h-10 bg-gradient-to-br ${netProfit >= 0 ? 'from-blue-500 to-blue-700' : 'from-yellow-500 to-yellow-700'} rounded-xl flex items-center justify-center`}>
-              <DollarSign className="w-5 h-5 text-white" />
+            <div className={`w-10 h-10 ${netProfit >= 0 ? 'bg-gold-500/10' : 'bg-red-500/10'} rounded-xl flex items-center justify-center`}>
+              <DollarSign className={`w-5 h-5 ${netProfit >= 0 ? 'text-gold-400' : 'text-red-400'}`} />
             </div>
-            <span className={`text-xs ${netProfit >= 0 ? 'text-blue-400' : 'text-yellow-400'}`}>سود خالص</span>
+            <span className={`text-xs ${netProfit >= 0 ? 'text-gold-400' : 'text-red-400'}`}>سود خالص</span>
           </div>
-          <p className={`text-2xl font-black ${netProfit >= 0 ? 'text-blue-400' : 'text-yellow-400'}`}>{netProfit.toLocaleString('fa-IR')}</p>
+          <p className={`text-2xl font-black ${netProfit >= 0 ? 'text-gold-400' : 'text-red-400'}`}>{netProfit.toLocaleString('fa-IR')}</p>
           <p className="text-xs text-white/30 mt-1">تومان</p>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
-          <input
-            type="text"
-            placeholder="جستجوی تراکنش..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full py-2.5 pr-10 pl-4 glass rounded-xl text-sm text-white placeholder-white/20 outline-none focus:border-gold-500/30"
-          />
-        </div>
-        <div className="flex gap-2">
-          {['', 'income', 'expense'].map(type => (
+      <div className="glass rounded-2xl p-4">
+        <div className="flex flex-col md:flex-row gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/20" />
+            <input
+              type="text"
+              placeholder="جستجوی توضیحات یا شماره مرجع..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full py-2.5 pr-10 pl-4 bg-white/5 border border-white/5 rounded-xl text-sm text-white placeholder-white/20 outline-none focus:border-gold-500/30"
+            />
+          </div>
+          <div className="flex gap-2">
             <button
-              key={type}
-              onClick={() => setTypeFilter(type)}
-              className={`px-4 py-2.5 rounded-xl text-xs transition-all ${typeFilter === type ? 'bg-gold-500/20 text-gold-400 border border-gold-500/30' : 'glass text-white/40 hover:text-white'}`}
+              onClick={() => setTypeFilter('')}
+              className={`px-4 py-2.5 rounded-xl text-xs transition-all ${typeFilter === '' ? 'bg-gold-500/20 text-gold-400 border border-gold-500/30' : 'glass text-white/40 hover:text-white'}`}
             >
-              {type === '' ? 'همه' : type === 'income' ? 'درآمد' : 'هزینه'}
+              همه
             </button>
-          ))}
+            <button
+              onClick={() => setTypeFilter('income')}
+              className={`px-4 py-2.5 rounded-xl text-xs transition-all ${typeFilter === 'income' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'glass text-white/40 hover:text-white'}`}
+            >
+              درآمد
+            </button>
+            <button
+              onClick={() => setTypeFilter('expense')}
+              className={`px-4 py-2.5 rounded-xl text-xs transition-all ${typeFilter === 'expense' ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'glass text-white/40 hover:text-white'}`}
+            >
+              هزینه
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Transactions list */}
+      {/* Transactions Table */}
       <div className="glass rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -165,7 +176,7 @@ export default function AdminAccounting() {
                 <th className="text-right text-xs font-medium text-white/30 px-4 py-3">دسته‌بندی</th>
                 <th className="text-right text-xs font-medium text-white/30 px-4 py-3">توضیحات</th>
                 <th className="text-right text-xs font-medium text-white/30 px-4 py-3">مبلغ</th>
-                <th className="text-right text-xs font-medium text-white/30 px-4 py-3">مرجع</th>
+                <th className="text-right text-xs font-medium text-white/30 px-4 py-3">شماره مرجع</th>
                 <th className="text-right text-xs font-medium text-white/30 px-4 py-3">عملیات</th>
               </tr>
             </thead>
@@ -180,14 +191,14 @@ export default function AdminAccounting() {
                       {transaction.type === 'income' ? 'درآمد' : 'هزینه'}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-sm text-white/50">{transaction.category}</td>
-                  <td className="px-4 py-3 text-sm text-white/60">{transaction.description}</td>
+                  <td className="px-4 py-3 text-sm text-white/60">{transaction.category}</td>
+                  <td className="px-4 py-3 text-sm text-white/50">{transaction.description}</td>
                   <td className="px-4 py-3">
                     <span className={`text-sm font-bold ${transaction.type === 'income' ? 'text-emerald-400' : 'text-red-400'}`}>
                       {transaction.type === 'income' ? '+' : '-'}{transaction.amount.toLocaleString('fa-IR')}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-sm text-white/50 font-mono text-xs">{transaction.reference}</td>
+                  <td className="px-4 py-3 text-sm text-white/40 font-mono text-xs">{transaction.referenceNumber || '-'}</td>
                   <td className="px-4 py-3">
                     <button
                       onClick={() => setDeleteConfirm(transaction.id)}
@@ -203,7 +214,7 @@ export default function AdminAccounting() {
         </div>
       </div>
 
-      {/* Add transaction form */}
+      {/* Add Transaction Form */}
       {showForm && (
         <TransactionForm
           onClose={() => setShowForm(false)}
@@ -211,7 +222,7 @@ export default function AdminAccounting() {
         />
       )}
 
-      {/* Delete confirmation */}
+      {/* Delete Confirmation */}
       {deleteConfirm !== null && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setDeleteConfirm(null)}>
           <div className="bg-[#0f0f1a] border border-white/5 rounded-2xl w-full max-w-md p-6" onClick={(e) => e.stopPropagation()}>
@@ -239,17 +250,17 @@ export default function AdminAccounting() {
 
 function TransactionForm({ onClose, onSave }: { onClose: () => void; onSave: (data: any) => void }) {
   const [formData, setFormData] = useState({
-    date: new Date().toLocaleDateString('fa-IR'),
-    type: 'income' as 'income' | 'expense',
-    category: 'فروش کتاب',
-    description: '',
+    type: 'income',
+    category: 'فروش',
     amount: 0,
-    reference: '',
+    description: '',
+    referenceNumber: '',
+    date: new Date().toLocaleDateString('fa-IR'),
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.description || !formData.amount) {
+    if (!formData.amount || !formData.description) {
       alert('لطفاً فیلدهای ضروری را پر کنید');
       return;
     }
@@ -266,6 +277,64 @@ function TransactionForm({ onClose, onSave }: { onClose: () => void; onSave: (da
           </button>
         </div>
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
+          <div>
+            <label className="text-xs text-white/40 mb-1.5 block">نوع تراکنش *</label>
+            <select
+              value={formData.type}
+              onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+              className="w-full px-4 py-2.5 bg-[#1a1a2e] border border-white/5 rounded-xl text-sm text-white outline-none focus:border-gold-500/30"
+            >
+              <option value="income">درآمد</option>
+              <option value="expense">هزینه</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-white/40 mb-1.5 block">دسته‌بندی *</label>
+            <select
+              value={formData.category}
+              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              className="w-full px-4 py-2.5 bg-[#1a1a2e] border border-white/5 rounded-xl text-sm text-white outline-none focus:border-gold-500/30"
+            >
+              {formData.type === 'income' ? (
+                <>
+                  <option value="فروش">فروش کتاب</option>
+                  <option value="خدمات">خدمات</option>
+                  <option value="سایر">سایر درآمدها</option>
+                </>
+              ) : (
+                <>
+                  <option value="خرید کتاب">خرید کتاب</option>
+                  <option value="حقوق">حقوق پرسنل</option>
+                  <option value="اجاره">اجاره</option>
+                  <option value="قبوض">قبوض</option>
+                  <option value="تبلیغات">تبلیغات</option>
+                  <option value="سایر">سایر هزینه‌ها</option>
+                </>
+              )}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-white/40 mb-1.5 block">مبلغ (تومان) *</label>
+            <input
+              type="number"
+              value={formData.amount}
+              onChange={(e) => setFormData({ ...formData, amount: Number(e.target.value) })}
+              className="w-full px-4 py-2.5 bg-white/5 border border-white/5 rounded-xl text-sm text-white outline-none focus:border-gold-500/30"
+              placeholder="۰"
+              required
+            />
+          </div>
+          <div>
+            <label className="text-xs text-white/40 mb-1.5 block">توضیحات *</label>
+            <textarea
+              rows={3}
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              className="w-full px-4 py-2.5 bg-white/5 border border-white/5 rounded-xl text-sm text-white outline-none focus:border-gold-500/30 resize-none"
+              placeholder="توضیحات تراکنش..."
+              required
+            />
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-xs text-white/40 mb-1.5 block">تاریخ</label>
@@ -274,71 +343,25 @@ function TransactionForm({ onClose, onSave }: { onClose: () => void; onSave: (da
                 value={formData.date}
                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                 className="w-full px-4 py-2.5 bg-white/5 border border-white/5 rounded-xl text-sm text-white outline-none focus:border-gold-500/30"
-              />
-            </div>
-            <div>
-              <label className="text-xs text-white/40 mb-1.5 block">نوع تراکنش</label>
-              <select
-                value={formData.type}
-                onChange={(e) => setFormData({ ...formData, type: e.target.value as 'income' | 'expense' })}
-                className="w-full px-4 py-2.5 bg-[#1a1a2e] border border-white/5 rounded-xl text-sm text-white outline-none focus:border-gold-500/30"
-              >
-                <option value="income">درآمد</option>
-                <option value="expense">هزینه</option>
-              </select>
-            </div>
-          </div>
-          <div>
-            <label className="text-xs text-white/40 mb-1.5 block">دسته‌بندی</label>
-            <select
-              value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              className="w-full px-4 py-2.5 bg-[#1a1a2e] border border-white/5 rounded-xl text-sm text-white outline-none focus:border-gold-500/30"
-            >
-              <option value="فروش کتاب">فروش کتاب</option>
-              <option value="خرید از تأمین‌کننده">خرید از تأمین‌کننده</option>
-              <option value="هزینه ارسال">هزینه ارسال</option>
-              <option value="حقوق پرسنل">حقوق پرسنل</option>
-              <option value="اجاره">اجاره</option>
-              <option value="قبوض">قبوض</option>
-              <option value="سایر">سایر</option>
-            </select>
-          </div>
-          <div>
-            <label className="text-xs text-white/40 mb-1.5 block">توضیحات *</label>
-            <input
-              type="text"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full px-4 py-2.5 bg-white/5 border border-white/5 rounded-xl text-sm text-white outline-none focus:border-gold-500/30"
-              placeholder="توضیحات تراکنش"
-              required
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs text-white/40 mb-1.5 block">مبلغ (تومان) *</label>
-              <input
-                type="number"
-                value={formData.amount}
-                onChange={(e) => setFormData({ ...formData, amount: Number(e.target.value) })}
-                className="w-full px-4 py-2.5 bg-white/5 border border-white/5 rounded-xl text-sm text-white outline-none focus:border-gold-500/30"
-                required
+                placeholder="1403/03/15"
               />
             </div>
             <div>
               <label className="text-xs text-white/40 mb-1.5 block">شماره مرجع</label>
               <input
                 type="text"
-                value={formData.reference}
-                onChange={(e) => setFormData({ ...formData, reference: e.target.value })}
+                value={formData.referenceNumber}
+                onChange={(e) => setFormData({ ...formData, referenceNumber: e.target.value })}
                 className="w-full px-4 py-2.5 bg-white/5 border border-white/5 rounded-xl text-sm text-white outline-none focus:border-gold-500/30"
-                placeholder="ORD-1001"
+                placeholder="REF-12345"
               />
             </div>
           </div>
           <div className="flex gap-2 pt-4 border-t border-white/5">
-            <button type="submit" className="flex-1 py-3 bg-gradient-to-l from-gold-500 to-gold-600 text-brand-950 rounded-xl font-bold text-sm">
+            <button
+              type="submit"
+              className="flex-1 py-3 bg-gradient-to-l from-gold-500 to-gold-600 text-brand-950 rounded-xl font-bold text-sm"
+            >
               ثبت تراکنش
             </button>
             <button type="button" onClick={onClose} className="px-6 py-3 glass rounded-xl text-sm text-white/60">

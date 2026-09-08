@@ -51,7 +51,7 @@ interface Transaction {
   category: string;
   description: string;
   amount: number;
-  reference: string;
+  referenceNumber: string;
 }
 
 interface StoreSettings {
@@ -170,14 +170,14 @@ const initialSuppliers: Supplier[] = [
 ];
 
 const initialTransactions: Transaction[] = [
-  { id: 1, date: '1403/03/15', type: 'income', category: 'فروش کتاب', description: 'فروش آنلاین کتاب بوف کور', amount: 85000, reference: 'ORD-1001' },
-  { id: 2, date: '1403/03/14', type: 'income', category: 'فروش کتاب', description: 'فروش آنلاین کتاب اثر مرکب', amount: 66500, reference: 'ORD-1002' },
-  { id: 3, date: '1403/03/13', type: 'expense', category: 'خرید از تأمین‌کننده', description: 'خرید کتاب از نشر چشمه', amount: 2500000, reference: 'INV-2001' },
-  { id: 4, date: '1403/03/12', type: 'expense', category: 'هزینه ارسال', description: 'هزینه پست سفارشات', amount: 350000, reference: 'EXP-3001' },
-  { id: 5, date: '1403/03/11', type: 'income', category: 'فروش کتاب', description: 'فروش حضوری کتاب کلیدر', amount: 245000, reference: 'ORD-1003' },
-  { id: 6, date: '1403/03/10', type: 'expense', category: 'حقوق پرسنل', description: 'حقوق ماهانه کارکنان', amount: 15000000, reference: 'SAL-4001' },
-  { id: 7, date: '1403/03/09', type: 'income', category: 'فروش کتاب', description: 'فروش آنلاین کتاب شازده کوچولو', amount: 65000, reference: 'ORD-1004' },
-  { id: 8, date: '1403/03/08', type: 'expense', category: 'اجاره', description: 'اجاره مغازه ماهانه', amount: 8000000, reference: 'RENT-5001' },
+  { id: 1, date: '1403/03/15', type: 'income', category: 'فروش کتاب', description: 'فروش آنلاین کتاب بوف کور', amount: 85000, referenceNumber: 'ORD-1001' },
+  { id: 2, date: '1403/03/14', type: 'income', category: 'فروش کتاب', description: 'فروش آنلاین کتاب اثر مرکب', amount: 66500, referenceNumber: 'ORD-1002' },
+  { id: 3, date: '1403/03/13', type: 'expense', category: 'خرید از تأمین‌کننده', description: 'خرید کتاب از نشر چشمه', amount: 2500000, referenceNumber: 'INV-2001' },
+  { id: 4, date: '1403/03/12', type: 'expense', category: 'هزینه ارسال', description: 'هزینه پست سفارشات', amount: 350000, referenceNumber: 'EXP-3001' },
+  { id: 5, date: '1403/03/11', type: 'income', category: 'فروش کتاب', description: 'فروش حضوری کتاب کلیدر', amount: 245000, referenceNumber: 'ORD-1003' },
+  { id: 6, date: '1403/03/10', type: 'expense', category: 'حقوق پرسنل', description: 'حقوق ماهانه کارکنان', amount: 15000000, referenceNumber: 'SAL-4001' },
+  { id: 7, date: '1403/03/09', type: 'income', category: 'فروش کتاب', description: 'فروش آنلاین کتاب شازده کوچولو', amount: 65000, referenceNumber: 'ORD-1004' },
+  { id: 8, date: '1403/03/08', type: 'expense', category: 'اجاره', description: 'اجاره مغازه ماهانه', amount: 8000000, referenceNumber: 'RENT-5001' },
 ];
 
 const initialNotifications: Notification[] = [

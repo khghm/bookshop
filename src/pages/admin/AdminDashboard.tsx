@@ -1,11 +1,30 @@
 import { useState } from 'react';
-import { TrendingUp, TrendingDown, DollarSign, ShoppingCart, Users, BookOpen, Eye, Edit, Trash2, Plus, Search, Filter, ChevronDown, Package, CheckCircle, XCircle, Clock, BarChart3 } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, ShoppingCart, Users, BookOpen, Eye, Edit, Trash2, Plus, Search, Filter, ChevronDown, Package, CheckCircle, XCircle, Clock, BarChart3, Download } from 'lucide-react';
 import { salesData, categories, Order } from '../../data/books';
 import { useAdmin } from '../../context/AdminContext';
+import { exportToPDF, exportToExcel } from '../../utils/exportUtils';
 
 export default function AdminDashboard() {
   const { books, orders, users } = useAdmin();
   const [activeSection] = useState('overview');
+
+  const handleExportPDF = () => {
+    const data = salesData.map(d => [
+      d.month,
+      d.revenue.toLocaleString('fa-IR'),
+      d.sales.toString(),
+    ]);
+    exportToPDF('گزارش فروش ماهانه', ['ماه', 'درآمد (تومان)', 'تعداد فروش'], data, 'dashboard-report');
+  };
+
+  const handleExportExcel = () => {
+    const data = salesData.map(d => ({
+      'ماه': d.month,
+      'درآمد (تومان)': d.revenue,
+      'تعداد فروش': d.sales,
+    }));
+    exportToExcel(data, 'dashboard-report', 'فروش ماهانه');
+  };
 
   const stats = [
     { title: 'فروش کل', value: '۲۴۵,۸۰۰,۰۰۰', unit: 'تومان', change: '+۱۲.۵٪', positive: true, icon: DollarSign, color: 'from-emerald-500 to-emerald-700' },
@@ -31,7 +50,7 @@ export default function AdminDashboard() {
             <option>۳ ماه اخیر</option>
             <option>امسال</option>
           </select>
-          <button className="px-4 py-2 bg-gradient-to-l from-gold-500 to-gold-600 text-brand-950 rounded-xl text-sm font-bold">
+          <button onClick={handleExportExcel} className="px-4 py-2 bg-gradient-to-l from-gold-500 to-gold-600 text-brand-950 rounded-xl text-sm font-bold">
             دانلود گزارش
           </button>
         </div>

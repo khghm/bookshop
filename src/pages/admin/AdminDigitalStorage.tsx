@@ -277,12 +277,27 @@ function DigitalFileForm({ file, books, onClose, onSave }: { file: any; books: a
     format: 'PDF',
     uploadDate: new Date().toLocaleDateString('fa-IR'),
   });
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setUploadedFile(file);
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      setFormData({
+        ...formData,
+        filePath: `/books/${file.name}`,
+        fileSize: `${sizeMB} MB`,
+        format: file.name.endsWith('.pdf') ? 'PDF' : file.name.endsWith('.epub') ? 'EPUB' : 'PDF',
+      });
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave(formData);
   };
-
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-[#0f0f1a] border border-white/5 rounded-2xl w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
@@ -306,11 +321,32 @@ function DigitalFileForm({ file, books, onClose, onSave }: { file: any; books: a
             </select>
           </div>
           <div>
-            <label className="text-xs text-white/40 mb-1.5 block">فایل</label>
-            <div className="w-full p-6 bg-white/5 border-2 border-dashed border-white/10 rounded-xl text-center">
-              <Upload className="w-8 h-8 text-white/30 mx-auto mb-2" />
-              <p className="text-sm text-white/50">فایل را اینجا رها کنید یا کلیک کنید</p>
-              <p className="text-xs text-white/30 mt-1">فرمت‌های مجاز: PDF, EPUB - حداکثر ۵۰ مگابایت</p>
+            <label className="text-xs text-white/40 mb-1.5 block">فایل دیجیتال</label>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.epub,.mobi"
+              onChange={handleFileUpload}
+              className="hidden"
+            />
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="w-full p-6 bg-white/5 border-2 border-dashed border-white/10 rounded-xl text-center cursor-pointer hover:border-gold-500/30 transition-colors"
+            >
+              {uploadedFile ? (
+                <div className="space-y-2">
+                  <FileText className="w-8 h-8 text-gold-400 mx-auto" />
+                  <p className="text-sm text-white font-medium">{uploadedFile.name}</p>
+                  <p className="text-xs text-white/40">{(uploadedFile.size / (1024 * 1024)).toFixed(2)} MB</p>
+                  <p className="text-xs text-gold-400">کلیک کنید برای تغییر فایل</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <Upload className="w-8 h-8 text-white/30 mx-auto" />
+                  <p className="text-sm text-white/50">فایل را اینجا رها کنید یا کلیک کنید</p>
+                  <p className="text-xs text-white/30">فرمت‌های مجاز: PDF, EPUB, MOBI - حداکثر ۵۰ مگابایت</p>
+                </div>
+              )}
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">

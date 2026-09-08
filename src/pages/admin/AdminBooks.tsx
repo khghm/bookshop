@@ -1,8 +1,8 @@
 import { useState, useRef } from 'react';
-import { Search, Plus, Edit, Trash2, Eye, Download, Upload, X, Save, Image as ImageIcon, Star, AlertTriangle, Check } from 'lucide-react';
+import { Search, Plus, Edit, Trash2, Eye, Download, Upload, X, Save, Image as ImageIcon, Star, AlertTriangle, Check, FileSpreadsheet } from 'lucide-react';
 import { useAdmin } from '../../context/AdminContext';
 import { categories, Book } from '../../data/books';
-import { exportToPDF, exportToExcel } from '../../utils/exportUtils';
+import { exportToPDF, exportToExcel, importFromExcel } from '../../utils/exportUtils';
 
 export default function AdminBooks() {
   const { books, addBook, updateBook, deleteBook } = useAdmin();
@@ -12,6 +12,8 @@ export default function AdminBooks() {
   const [showForm, setShowForm] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importing, setImporting] = useState(false);
 
   const filteredBooks = books.filter(b => {
     if (searchQuery && !b.title.includes(searchQuery) && !b.author.includes(searchQuery)) return false;
@@ -56,6 +58,53 @@ export default function AdminBooks() {
     showToast('کتاب با موفقیت حذف شد');
   };
 
+  const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setImporting(true);
+    try {
+      const data = await importFromExcel(file);
+      let importedCount = 0;
+
+      for (const row of data) {
+        const bookData = {
+          title: row['عنوان'] || row['title'] || '',
+          author: row['نویسنده'] || row['author'] || '',
+          price: Number(row['قیمت'] || row['price'] || 0),
+          originalPrice: Number(row['قیمت اصلی'] || row['originalPrice'] || 0),
+          cover: row['تصویر'] || row['cover'] || 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=600&fit=crop',
+          category: row['دسته‌بندی'] || row['category'] || 'fiction',
+          format: (row['نوع'] || row['format'] || 'paper') as 'paper' | 'digital' | 'both',
+          rating: Number(row['امتیاز'] || row['rating'] || 4.5),
+          reviewCount: Number(row['تعداد نظر'] || row['reviewCount'] || 0),
+          description: row['توضیحات'] || row['description'] || '',
+          pages: Number(row['صفحات'] || row['pages'] || 0),
+          publisher: row['ناشر'] || row['publisher'] || '',
+          publishYear: Number(row['سال انتشار'] || row['publishYear'] || 1403),
+          isbn: row['شابک'] || row['isbn'] || '',
+          language: row['زبان'] || row['language'] || 'فارسی',
+          stock: Number(row['موجودی'] || row['stock'] || 100),
+          bestseller: row['پرفروش'] === 'بله' || row['bestseller'] === true,
+          newArrival: row['جدید'] === 'بله' || row['newArrival'] === true,
+          discount: Number(row['تخفیف'] || row['discount'] || 0),
+        };
+
+        if (bookData.title && bookData.author) {
+          addBook(bookData);
+          importedCount++;
+        }
+      }
+
+      showToast(`${importedCount} کتاب با موفقیت وارد شد`);
+      setShowImportModal(false);
+    } catch (error) {
+      showToast('خطا در خواندن فایل', 'error');
+    } finally {
+      setImporting(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Toast */}
@@ -68,6 +117,60 @@ export default function AdminBooks() {
         </div>
       )}
 
+      {/* Import Modal */}
+      {showImportModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowImportModal(false)}>
+          <div className="bg-[#0f0f1a] border border-white/5 rounded-2xl w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
+            <div className="p-5 border-b border-white/5 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-xl flex items-center justify-center">
+                  <FileSpreadsheet className="w-5 h-5 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-white">ورود دسته‌ای کتاب‌ها</h3>
+              </div>
+              <button onClick={() => setShowImportModal(false)} className="w-8 h-8 glass rounded-lg flex items-center justify-center text-white/40 hover:text-white">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="glass rounded-xl p-4">
+                <p className="text-sm text-white/60 mb-3">فایل Excel یا CSV خود را آپلود کنید. فایل باید شامل ستون‌های زیر باشد:</p>
+                <div className="grid grid-cols-2 gap-2 text-xs text-white/40">
+                  <div>عنوان، نویسنده، قیمت</div>
+                  <div>دسته‌بندی، ناشر، صفحات</div>
+                  <div>سال انتشار، شابک، زبان</div>
+                  <div>موجودی، توضیحات</div>
+                </div>
+              </div>
+              <div>
+                <label className="text-xs text-white/40 mb-2 block">انتخاب فایل</label>
+                <input
+                  type="file"
+                  accept=".xlsx,.xls,.csv"
+                  onChange={handleImport}
+                  disabled={importing}
+                  className="w-full px-4 py-3 bg-white/5 border border-white/5 rounded-xl text-sm text-white/60 file:ml-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-gold-500/20 file:text-gold-400 file:font-medium file:cursor-pointer disabled:opacity-50"
+                />
+              </div>
+              {importing && (
+                <div className="flex items-center gap-2 text-sm text-gold-400">
+                  <div className="w-4 h-4 border-2 border-gold-400 border-t-transparent rounded-full animate-spin" />
+                  <span>در حال پردازش فایل...</span>
+                </div>
+              )}
+              <div className="flex gap-2 pt-4 border-t border-white/5">
+                <button
+                  onClick={() => setShowImportModal(false)}
+                  className="flex-1 py-3 glass rounded-xl text-sm text-white/60 hover:text-white"
+                >
+                  بستن
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -75,7 +178,7 @@ export default function AdminBooks() {
           <p className="text-sm text-white/40 mt-1">{books.length} عنوان کتاب ثبت شده</p>
         </div>
         <div className="flex items-center gap-2">
-          <button className="flex items-center gap-2 px-4 py-2.5 glass rounded-xl text-sm text-white/60 hover:text-white transition-colors">
+          <button onClick={() => setShowImportModal(true)} className="flex items-center gap-2 px-4 py-2.5 glass rounded-xl text-sm text-white/60 hover:text-white transition-colors">
             <Upload className="w-4 h-4" />
             <span className="hidden sm:inline">ورود دسته‌ای</span>
           </button>
