@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Search, Eye, Package, CheckCircle, XCircle, Clock, Truck, Download, ChevronDown, Trash2, AlertTriangle, X } from 'lucide-react';
 import { useAdmin } from '../../context/AdminContext';
 import { Order } from '../../data/books';
+import { exportToPDF, exportToExcel } from '../../utils/exportUtils';
 
 export default function AdminOrders() {
   const { orders, updateOrderStatus, deleteOrder } = useAdmin();
@@ -39,6 +40,32 @@ export default function AdminOrders() {
     setTimeout(() => setToast(null), 3000);
   };
 
+  const handleExportPDF = () => {
+    const data = filteredOrders.map(o => [
+      o.id,
+      o.customerName,
+      o.date,
+      o.total.toLocaleString('fa-IR'),
+      o.paymentMethod,
+      o.status === 'pending' ? 'در انتظار' : o.status === 'processing' ? 'پردازش' : o.status === 'shipped' ? 'ارسال شده' : o.status === 'delivered' ? 'تحویل شده' : 'لغو شده',
+    ]);
+    exportToPDF('گزارش سفارشات', ['شماره سفارش', 'مشتری', 'تاریخ', 'مبلغ', 'روش پرداخت', 'وضعیت'], data, 'orders-report');
+  };
+
+  const handleExportExcel = () => {
+    const data = filteredOrders.map(o => ({
+      'شماره سفارش': o.id,
+      'مشتری': o.customerName,
+      'ایمیل': o.customerEmail,
+      'تاریخ': o.date,
+      'مبلغ (تومان)': o.total,
+      'روش پرداخت': o.paymentMethod,
+      'وضعیت': o.status,
+      'آدرس': o.address,
+    }));
+    exportToExcel(data, 'orders-report', 'سفارشات');
+  };
+
   const handleStatusChange = (orderId: string, newStatus: Order['status']) => {
     updateOrderStatus(orderId, newStatus);
     showToast('وضعیت سفارش بروزرسانی شد');
@@ -67,9 +94,13 @@ export default function AdminOrders() {
           <h1 className="text-2xl font-black text-white">مدیریت سفارشات</h1>
           <p className="text-sm text-white/40 mt-1">{orders.length} سفارش ثبت شده</p>
         </div>
-        <button className="flex items-center gap-2 px-4 py-2.5 glass rounded-xl text-sm text-white/60 hover:text-white transition-colors">
+        <button onClick={handleExportPDF} className="flex items-center gap-2 px-4 py-2.5 glass rounded-xl text-sm text-white/60 hover:text-white transition-colors">
           <Download className="w-4 h-4" />
-          خروجی اکسل
+          PDF
+        </button>
+        <button onClick={handleExportExcel} className="flex items-center gap-2 px-4 py-2.5 glass rounded-xl text-sm text-white/60 hover:text-white transition-colors">
+          <Download className="w-4 h-4" />
+          Excel
         </button>
       </div>
 

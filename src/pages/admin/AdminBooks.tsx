@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { Search, Plus, Edit, Trash2, Eye, Download, Upload, X, Save, Image as ImageIcon, Star, AlertTriangle, Check } from 'lucide-react';
 import { useAdmin } from '../../context/AdminContext';
 import { categories, Book } from '../../data/books';
+import { exportToPDF, exportToExcel } from '../../utils/exportUtils';
 
 export default function AdminBooks() {
   const { books, addBook, updateBook, deleteBook } = useAdmin();
@@ -21,6 +22,32 @@ export default function AdminBooks() {
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
+  };
+
+  const handleExportPDF = () => {
+    const data = filteredBooks.map(b => [
+      b.title,
+      b.author,
+      categories.find(c => c.id === b.category)?.name || '-',
+      b.price.toLocaleString('fa-IR'),
+      b.stock.toString(),
+      b.salesCount.toLocaleString('fa-IR'),
+      b.rating.toString(),
+    ]);
+    exportToPDF('گزارش کتاب‌ها', ['عنوان', 'نویسنده', 'دسته‌بندی', 'قیمت', 'موجودی', 'فروش', 'امتیاز'], data, 'books-report');
+  };
+
+  const handleExportExcel = () => {
+    const data = filteredBooks.map(b => ({
+      'عنوان': b.title,
+      'نویسنده': b.author,
+      'دسته‌بندی': categories.find(c => c.id === b.category)?.name || '-',
+      'قیمت (تومان)': b.price,
+      'موجودی': b.stock,
+      'تعداد فروش': b.salesCount,
+      'امتیاز': b.rating,
+    }));
+    exportToExcel(data, 'books-report', 'کتاب‌ها');
   };
 
   const handleDelete = (id: number) => {
@@ -52,9 +79,13 @@ export default function AdminBooks() {
             <Upload className="w-4 h-4" />
             <span className="hidden sm:inline">ورود دسته‌ای</span>
           </button>
-          <button className="flex items-center gap-2 px-4 py-2.5 glass rounded-xl text-sm text-white/60 hover:text-white transition-colors">
+          <button onClick={handleExportPDF} className="flex items-center gap-2 px-4 py-2.5 glass rounded-xl text-sm text-white/60 hover:text-white transition-colors">
             <Download className="w-4 h-4" />
-            <span className="hidden sm:inline">خروجی</span>
+            <span className="hidden sm:inline">PDF</span>
+          </button>
+          <button onClick={handleExportExcel} className="flex items-center gap-2 px-4 py-2.5 glass rounded-xl text-sm text-white/60 hover:text-white transition-colors">
+            <Download className="w-4 h-4" />
+            <span className="hidden sm:inline">Excel</span>
           </button>
           <button
             onClick={() => { setEditingBook(null); setShowForm(true); }}

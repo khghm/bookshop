@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Tag, Plus, Edit, Trash2, Copy, Check, Percent, Calendar, Save, X, AlertTriangle } from 'lucide-react';
+import { Tag, Plus, Edit, Trash2, Copy, Check, Percent, Calendar, Save, X, AlertTriangle, Download } from 'lucide-react';
 import { useAdmin } from '../../context/AdminContext';
+import { exportToPDF, exportToExcel } from '../../utils/exportUtils';
 
 export default function AdminCoupons() {
   const { coupons, addCoupon, updateCoupon, deleteCoupon } = useAdmin();
@@ -19,6 +20,31 @@ export default function AdminCoupons() {
   const showToast = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
+  };
+
+  const handleExportPDF = () => {
+    const data = coupons.map(c => [
+      c.code,
+      c.type === 'percent' ? `${c.discount}٪` : `${c.discount.toLocaleString('fa-IR')} تومان`,
+      c.usageLimit.toString(),
+      c.usedCount.toString(),
+      c.expiryDate,
+      c.status === 'active' ? 'فعال' : c.status === 'expired' ? 'منقضی' : 'غیرفعال',
+    ]);
+    exportToPDF('گزارش کدهای تخفیف', ['کد', 'مقدار تخفیف', 'محدودیت', 'استفاده شده', 'تاریخ انقضا', 'وضعیت'], data, 'coupons-report');
+  };
+
+  const handleExportExcel = () => {
+    const data = coupons.map(c => ({
+      'کد تخفیف': c.code,
+      'نوع': c.type === 'percent' ? 'درصدی' : 'مبلغ ثابت',
+      'مقدار تخفیف': c.type === 'percent' ? `${c.discount}٪` : c.discount,
+      'محدودیت استفاده': c.usageLimit,
+      'تعداد استفاده': c.usedCount,
+      'تاریخ انقضا': c.expiryDate,
+      'وضعیت': c.status === 'active' ? 'فعال' : c.status === 'expired' ? 'منقضی' : 'غیرفعال',
+    }));
+    exportToExcel(data, 'coupons-report', 'کدهای تخفیف');
   };
 
   const handleDelete = (id: number) => {
@@ -53,13 +79,23 @@ export default function AdminCoupons() {
           <h1 className="text-2xl font-black text-white">کدهای تخفیف</h1>
           <p className="text-sm text-white/40 mt-1">مدیریت کدهای تخفیف فروشگاه</p>
         </div>
-        <button
-          onClick={() => { setEditingCoupon(null); setShowForm(true); }}
-          className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-l from-gold-500 to-gold-600 text-brand-950 rounded-xl text-sm font-bold shadow-lg shadow-gold-500/20"
-        >
-          <Plus className="w-4 h-4" />
-          ایجاد کد تخفیف
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={handleExportPDF} className="flex items-center gap-2 px-4 py-2.5 glass rounded-xl text-sm text-white/60 hover:text-white transition-colors">
+            <Download className="w-4 h-4" />
+            PDF
+          </button>
+          <button onClick={handleExportExcel} className="flex items-center gap-2 px-4 py-2.5 glass rounded-xl text-sm text-white/60 hover:text-white transition-colors">
+            <Download className="w-4 h-4" />
+            Excel
+          </button>
+          <button
+            onClick={() => { setEditingCoupon(null); setShowForm(true); }}
+            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-l from-gold-500 to-gold-600 text-brand-950 rounded-xl text-sm font-bold shadow-lg shadow-gold-500/20"
+          >
+            <Plus className="w-4 h-4" />
+            ایجاد کد تخفیف
+          </button>
+        </div>
       </div>
 
       {/* Stats */}

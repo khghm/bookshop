@@ -1,6 +1,7 @@
 import { BarChart3, TrendingUp, DollarSign, ShoppingCart, Users, BookOpen, Calendar, Download } from 'lucide-react';
 import { salesData } from '../../data/books';
 import { useAdmin } from '../../context/AdminContext';
+import { exportToPDF, exportToExcel } from '../../utils/exportUtils';
 
 export default function AdminReports() {
   const { books, orders, users } = useAdmin();
@@ -8,6 +9,24 @@ export default function AdminReports() {
   const totalSales = salesData.reduce((sum, d) => sum + d.sales, 0);
   const avgOrderValue = totalRevenue / orders.length;
   const maxRevenue = Math.max(...salesData.map(d => d.revenue));
+
+  const handleExportPDF = () => {
+    const data = salesData.map(d => [
+      d.month,
+      d.revenue.toLocaleString('fa-IR'),
+      d.sales.toString(),
+    ]);
+    exportToPDF('گزارش فروش ماهانه', ['ماه', 'درآمد (تومان)', 'تعداد فروش'], data, 'sales-report');
+  };
+
+  const handleExportExcel = () => {
+    const data = salesData.map(d => ({
+      'ماه': d.month,
+      'درآمد (تومان)': d.revenue,
+      'تعداد فروش': d.sales,
+    }));
+    exportToExcel(data, 'sales-report', 'فروش ماهانه');
+  };
 
   return (
     <div className="space-y-6">
@@ -21,9 +40,13 @@ export default function AdminReports() {
             <option>سال ۱۴۰۳</option>
             <option>سال ۱۴۰۲</option>
           </select>
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-l from-gold-500 to-gold-600 text-brand-950 rounded-xl text-sm font-bold">
+          <button onClick={handleExportPDF} className="flex items-center gap-2 px-4 py-2.5 glass rounded-xl text-sm text-white/60 hover:text-white transition-colors">
             <Download className="w-4 h-4" />
-            دانلود PDF
+            PDF
+          </button>
+          <button onClick={handleExportExcel} className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-l from-gold-500 to-gold-600 text-brand-950 rounded-xl text-sm font-bold shadow-lg shadow-gold-500/20">
+            <Download className="w-4 h-4" />
+            Excel
           </button>
         </div>
       </div>

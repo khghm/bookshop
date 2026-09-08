@@ -18,6 +18,10 @@ import AdminUsers from './pages/admin/AdminUsers';
 import AdminReports from './pages/admin/AdminReports';
 import AdminCoupons from './pages/admin/AdminCoupons';
 import AdminSettings from './pages/admin/AdminSettings';
+import AdminWarehouse from './pages/admin/AdminWarehouse';
+import AdminDigitalStorage from './pages/admin/AdminDigitalStorage';
+import AdminAccounting from './pages/admin/AdminAccounting';
+import AdminSuppliers from './pages/admin/AdminSuppliers';
 
 function App() {
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
@@ -112,6 +116,34 @@ function App() {
             isAdminLoggedIn ? (
               <AdminLayout onLogout={() => setIsAdminLoggedIn(false)}>
                 <AdminCoupons />
+              </AdminLayout>
+            ) : <Navigate to="/admin" />
+          } />
+          <Route path="/admin/warehouse" element={
+            isAdminLoggedIn ? (
+              <AdminLayout onLogout={() => setIsAdminLoggedIn(false)}>
+                <AdminWarehouse />
+              </AdminLayout>
+            ) : <Navigate to="/admin" />
+          } />
+          <Route path="/admin/digital" element={
+            isAdminLoggedIn ? (
+              <AdminLayout onLogout={() => setIsAdminLoggedIn(false)}>
+                <AdminDigitalStorage />
+              </AdminLayout>
+            ) : <Navigate to="/admin" />
+          } />
+          <Route path="/admin/suppliers" element={
+            isAdminLoggedIn ? (
+              <AdminLayout onLogout={() => setIsAdminLoggedIn(false)}>
+                <AdminSuppliers />
+              </AdminLayout>
+            ) : <Navigate to="/admin" />
+          } />
+          <Route path="/admin/accounting" element={
+            isAdminLoggedIn ? (
+              <AdminLayout onLogout={() => setIsAdminLoggedIn(false)}>
+                <AdminAccounting />
               </AdminLayout>
             ) : <Navigate to="/admin" />
           } />

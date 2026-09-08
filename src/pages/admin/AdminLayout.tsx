@@ -20,8 +20,12 @@ export default function AdminLayout({ children, onLogout }: AdminLayoutProps) {
     { path: '/admin/books', icon: BookOpen, label: 'مدیریت کتاب‌ها' },
     { path: '/admin/orders', icon: ShoppingCart, label: 'سفارشات' },
     { path: '/admin/users', icon: Users, label: 'کاربران' },
-    { path: '/admin/reports', icon: BarChart3, label: 'گزارشات' },
+    { path: '/admin/warehouse', icon: Package, label: 'انبار فیزیکی' },
+    { path: '/admin/digital', icon: Tag, label: 'انبار دیجیتال' },
+    { path: '/admin/suppliers', icon: Users, label: 'تأمین‌کنندگان' },
+    { path: '/admin/accounting', icon: BarChart3, label: 'حسابداری' },
     { path: '/admin/coupons', icon: Tag, label: 'کدهای تخفیف' },
+    { path: '/admin/reports', icon: BarChart3, label: 'گزارشات' },
     { path: '/admin/settings', icon: Settings, label: 'تنظیمات' },
   ];
 

@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Search, Eye, Edit, Ban, CheckCircle, AlertTriangle, X, ChevronDown } from 'lucide-react';
+import { Search, Eye, Edit, Ban, CheckCircle, AlertTriangle, X, ChevronDown, Download } from 'lucide-react';
 import { useAdmin } from '../../context/AdminContext';
 import { User } from '../../data/books';
+import { exportToPDF, exportToExcel } from '../../utils/exportUtils';
 
 export default function AdminUsers() {
   const { users, updateUserStatus, deleteUser } = useAdmin();
@@ -26,6 +27,32 @@ export default function AdminUsers() {
   const showToast = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
+  };
+
+  const handleExportPDF = () => {
+    const data = filteredUsers.map(u => [
+      u.name,
+      u.email,
+      u.phone,
+      u.joinDate,
+      u.totalOrders.toString(),
+      u.totalSpent.toLocaleString('fa-IR'),
+      u.status === 'active' ? 'فعال' : u.status === 'inactive' ? 'غیرفعال' : 'مسدود',
+    ]);
+    exportToPDF('گزارش کاربران', ['نام', 'ایمیل', 'تلفن', 'تاریخ عضویت', 'سفارشات', 'مجموع خرید', 'وضعیت'], data, 'users-report');
+  };
+
+  const handleExportExcel = () => {
+    const data = filteredUsers.map(u => ({
+      'نام': u.name,
+      'ایمیل': u.email,
+      'تلفن': u.phone,
+      'تاریخ عضویت': u.joinDate,
+      'تعداد سفارشات': u.totalOrders,
+      'مجموع خرید (تومان)': u.totalSpent,
+      'وضعیت': u.status === 'active' ? 'فعال' : u.status === 'inactive' ? 'غیرفعال' : 'مسدود',
+    }));
+    exportToExcel(data, 'users-report', 'کاربران');
   };
 
   const handleStatusChange = (userId: number, newStatus: User['status']) => {
@@ -55,6 +82,16 @@ export default function AdminUsers() {
         <div>
           <h1 className="text-2xl font-black text-white">مدیریت کاربران</h1>
           <p className="text-sm text-white/40 mt-1">{users.length} کاربر ثبت‌نام شده</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button onClick={handleExportPDF} className="flex items-center gap-2 px-4 py-2.5 glass rounded-xl text-sm text-white/60 hover:text-white transition-colors">
+            <Download className="w-4 h-4" />
+            PDF
+          </button>
+          <button onClick={handleExportExcel} className="flex items-center gap-2 px-4 py-2.5 glass rounded-xl text-sm text-white/60 hover:text-white transition-colors">
+            <Download className="w-4 h-4" />
+            Excel
+          </button>
         </div>
       </div>
 
